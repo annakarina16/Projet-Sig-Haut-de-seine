@@ -1,0 +1,17 @@
+name: "projet-sig"
+output_dir: "docs"
+navbar:
+  title: "Projet SIG"
+  left:
+    - text: "Page Accueil"
+      href: index.html
+    - text: "Données"
+      href: Données.html
+    - text: "Géotraitement"
+      href: Géotraitement.html
+    - text: "Jointures et calculs"
+      href: Jointures et calculs.html
+output:
+  html_document:
+    theme: flatly 
+    

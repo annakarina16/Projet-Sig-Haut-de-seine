@@ -1,8 +1,0 @@
----
-title: "À propos"
-output: html_document
----
-
-# À propos
-
-*Contenu à venir*

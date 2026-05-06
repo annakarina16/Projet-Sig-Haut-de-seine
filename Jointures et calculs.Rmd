@@ -1,8 +1,0 @@
----
-title: "Jointures et calculs"
-output: html_document
----
-
-# Jointures et calculs
-
-*Contenu à venir*

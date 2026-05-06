@@ -1,6 +1,0 @@
----
-title: "Méthode de réalisation"
-output: html_document
-date: "2026-04-18"
----
-

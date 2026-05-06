@@ -9,8 +9,8 @@ navbar:
       href: Données.html
     - text: "Géotraitement"
       href: Géotraitement.html
-    - text: "Jointures-et-calculs"
-      href: Jointures-et-calculs.html
+    - text: "Jointures"
+      href: Jointures.html
 output:
   html_document:
     theme: flatly 

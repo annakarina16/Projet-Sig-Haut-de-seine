@@ -271,9 +271,38 @@ $(document).ready(function () {
 </div>
 
 
-<div id="jointures" class="section level1">
-<h1>Jointures</h1>
-<p><em>Contenu à venir</em></p>
+<div id="jointures-et-calculs" class="section level2">
+<h2>3- Jointures et calculs</h2>
+<div id="calculs-arcgis-pro" class="section level3">
+<h3>Calculs (ArcGIS Pro)</h3>
+<p>Avant de procéder aux jointures, nous avons calculé les surfaces
+géométriques dans <strong>ArcGIS Pro</strong> :</p>
+<ul>
+<li><p><strong>Surface totale</strong> des communes.</p></li>
+<li><p><strong>Surface de la végétation</strong> (issue du traitement
+raster).</p></li>
+<li><p><strong>Surface des espaces naturels</strong>.</p></li>
+</ul>
+<p>Ces indicateurs permettent de normaliser les données pour comparer
+l’occupation du sol entre les différentes communes du département.</p>
+</div>
+<div id="jointures-sous-r" class="section level3">
+<h3>Jointures (sous R)</h3>
+<p>La consolidation des données a été effectuée sous <strong>R</strong>.
+Nous avons réalisé des jointures attributaires pour fusionner les cinq
+sources d’informations :</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Revenu médian</strong> par habitant.</p></li>
+<li><p><strong>Dépenses des collectivités</strong>.</p></li>
+<li><p><strong>Limites administratives</strong> (communes).</p></li>
+<li><p><strong>Végétation</strong> (NDVI).</p></li>
+<li><p><strong>Espaces naturels</strong>.</p></li>
+</ol>
+<p>Le résultat final est une table unique regroupant par commune : les
+surfaces (en km²), le niveau de richesse et les investissements
+publics.</p>
+<hr />
+</div>
 </div>
 
 

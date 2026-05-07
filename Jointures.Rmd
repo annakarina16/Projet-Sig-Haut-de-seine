@@ -3,7 +3,36 @@ title: "Jointures"
 output: html_document
 ---
 
-# Jointures
+## 3- Jointures et calculs
 
-*Contenu à venir*
+### Calculs (ArcGIS Pro)
+
+Avant de procéder aux jointures, nous avons calculé les surfaces géométriques dans **ArcGIS Pro** :
+
+*   **Surface totale** des communes.
+
+*   **Surface de la végétation** (issue du traitement raster).
+
+*   **Surface des espaces naturels**.
+
+Ces indicateurs permettent de normaliser les données pour comparer l'occupation du sol entre les différentes communes du département.
+
+
+### Jointures (sous R)
+
+La consolidation des données a été effectuée sous **R**. Nous avons réalisé des jointures attributaires pour fusionner les cinq sources d'informations :
+
+1.  **Revenu médian** par habitant.
+
+2.  **Dépenses des collectivités**.
+
+3.  **Limites administratives** (communes).
+
+4.  **Végétation** (NDVI).
+
+5.  **Espaces naturels**.
+
+Le résultat final est une table unique regroupant par commune : les surfaces (en km²), le niveau de richesse et les investissements publics.
+
+---
 

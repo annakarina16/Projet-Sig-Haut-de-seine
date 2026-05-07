@@ -1,8 +1,7 @@
 
 
-# Projet SIG riche/pauvre : Les espaces verts dans les Hauts-de-Seine
+# Projet SIG riche/pauvre : Les espaces verts et la végétation dans les Hauts-de-Seine
 
-**En cours de réalisation**
 
 **Nom du groupe :** maleug
 
@@ -10,6 +9,11 @@
 
 - Simon Meyer-Mommaerts - Rédacteur
 - Adel Abdelaziz Zeboudj - Technique
+
+
+
+
+
 
 **Sujet du projet :** **Les espaces verts et la végétation sont-ils un marqueur socio-économique ? Cas du département des Hauts-de-Seine**
 

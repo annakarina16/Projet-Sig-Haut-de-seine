@@ -10,9 +10,8 @@
 
 
 
-<meta name="date" content="2026-04-18" />
 
-<title>Géotraitemen</title>
+<title>Géotraitement</title>
 
 <script src="site_libs/header-attrs-2.31/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -267,15 +266,67 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Géotraitemen</h1>
-<h4 class="date">2026-04-18</h4>
+<h1 class="title toc-ignore">Géotraitement</h1>
 
 </div>
 
 
-<div id="géotraitement" class="section level1">
-<h1>Géotraitement</h1>
-<p>git commit -m “Mon message de mise à jour”</p>
+<div id="géotraitement-raster" class="section level2">
+<h2>1- Géotraitement Raster</h2>
+<p><strong>Schéma de géotraitement :</strong></p>
+<p><img src="communes%20d%C3%A9partement.png" alt="" width="70%" /></p>
+<ul>
+<li>Dans un premier temps, nous avons reprojeté et découpé l’image NDVI
+d’après les limites administratives du département des
+Hauts-de-Seine.</li>
+</ul>
+<p><img src="ndvicomplet.png" alt="" width="30%" />
+<img src="image_ndvi.png" alt="" width="30%" /></p>
+<ul>
+<li>Puis, grâce à l’outil « Index NDVI », nous avons obtenu une couche
+dont les valeurs sont comprises entre -1 et +1.</li>
+</ul>
+<p><img src="NDVI3.png" alt="" width="30%" /></p>
+<ul>
+<li><p>Ensuite, grâce à l’outil « Con », nous avons séparé la végétation
+du reste des sols en lui donnant une seule valeur (vrai) et une autre
+pour le reste (faux). En effet, la végétation est comprise entre 0,3 et
+1 dans la plage de la couche précédente.
+<img src="NDVI4.png" alt="" width="20%" />
+<img src="NDVI5.png" alt="" width="20%" /></p></li>
+<li><p>Enfin, grâce à l’outil « Raster vers polygones », on obtient des
+polygones qui représentent les espaces végétalisés dans le département
+des Hauts-de-Seine.</p></li>
+</ul>
+<p><img src="NDVI6.png" alt="" width="30%" /></p>
+<div id="géotraitement-vecteur" class="section level3">
+<h3>2- Géotraitement vecteur</h3>
+<p><strong>Schéma de géotraitement :</strong></p>
+<p><img src="V1.png" alt="" width="70%" /></p>
+<ul>
+<li>Les deux couches vecteurs (« Végétation des Hauts-de-Seine » et «
+Espaces naturels du département ») ont subi le même traitement. Nous
+avons d’abord fusionné les polygones de ces couches afin d’obtenir une
+entité unique pour chaque donnée car le géotraitement raster génère des
+milliers de micro-polygones risquant de créer des erreurs ou des
+lenteurs de calcul.</li>
+</ul>
+<p><img src="V2.png" alt="" width="20%" /></p>
+<ul>
+<li>Ensuite, nous avons intersecté séparément ces couches avec la couche
+des communes. Cela permet d’obtenir, pour chaque commune, les polygones
+représentant sa végétation et ses espaces verts propres. À noter que
+cette intersection facilite également les futures jointures de
+données.</li>
+</ul>
+<p><img src="V3.png" alt="" width="20%" /></p>
+<p><strong>Répartition de la végétation et des espaces naturels dans le
+92:</strong></p>
+</div>
+</div>
+<div id="section" class="section level2">
+<h2><img src="V4.png" alt="" width="70%" /></h2>
+<hr />
 </div>
 
 

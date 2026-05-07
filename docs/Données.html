@@ -341,9 +341,13 @@ reflète la richesse budgétaire de la commune.</p>
 <h3>Création de l’Indice de Richesse</h3>
 <p>La combinaison de ces deux sources statistiques nous a permis de
 classer les communes. Nous avons créé un <strong>indice de
-richesse</strong> synthétique selon la formule suivante :</p>
-<p><span class="math display">\[Indice\_Richesse = \frac{Revenu\_médian
-+ Dépenses\_collectivité\_hab}{2}\]</span></p>
+richesse</strong> ou les deux variables sont normalisées entre 1 et 0
+selon la formule suivante :</p>
+<p><span class="math display">\[\text{Indice de richesse} =
+\left(
+  \frac{R - R_{min}}{R_{max} - R_{min}} \times 0{,}5 \ + \
+  \frac{D - D_{min}}{D_{max} - D_{min}} \times 0{,}5
+\right) \times 100\]</span></p>
 <blockquote>
 <p>Cet indice permet de pondérer la richesse directe des ménages avec la
 capacité d’investissement de leur commune de résidence.</p>

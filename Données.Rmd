@@ -52,9 +52,17 @@ Jeu de données extrait de l'**OFGL** (Observatoire des Finances et de la Gestio
 
 ### Création de l'Indice de Richesse
 
-La combinaison de ces deux sources statistiques nous a permis de classer les communes. Nous avons créé un **indice de richesse** synthétique selon la formule suivante :
+La combinaison de ces deux sources statistiques nous a permis de classer les communes. Nous avons créé un **indice de richesse** ou les deux variables sont normalisées entre 1 et 0 selon la formule suivante :
 
-$$Indice\_Richesse = \frac{Revenu\_médian + Dépenses\_collectivité\_hab}{2}$$
+```{r echo=FALSE, results='asis'}
+cat("
+$$\\text{Indice de richesse} = 
+\\left(
+  \\frac{R - R_{min}}{R_{max} - R_{min}} \\times 0{,}5 \\ + \\ 
+  \\frac{D - D_{min}}{D_{max} - D_{min}} \\times 0{,}5
+\\right) \\times 100$$
+")
+```
 
 > Cet indice permet de pondérer la richesse directe des ménages avec la capacité d'investissement de leur commune de résidence.
 

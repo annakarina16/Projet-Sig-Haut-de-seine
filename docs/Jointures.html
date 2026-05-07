@@ -32,6 +32,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -301,6 +303,752 @@ sources d’informations :</p>
 <p>Le résultat final est une table unique regroupant par commune : les
 surfaces (en km²), le niveau de richesse et les investissements
 publics.</p>
+<table class="table table-striped table-hover" style="font-size: 14px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(44, 62, 80, 255) !important;">
+Commune
+</th>
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(44, 62, 80, 255) !important;">
+Revenu médian (€)
+</th>
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(44, 62, 80, 255) !important;">
+Surface (km²)
+</th>
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(44, 62, 80, 255) !important;">
+Surface espaces verts (km²)
+</th>
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(44, 62, 80, 255) !important;">
+Surface végétation (km²)
+</th>
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(44, 62, 80, 255) !important;">
+Dépenses/hab. 2024 (€)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+ANTONY
+</td>
+<td style="text-align:right;">
+32000
+</td>
+<td style="text-align:right;">
+9.56
+</td>
+<td style="text-align:right;">
+1.06
+</td>
+<td style="text-align:right;">
+5.86
+</td>
+<td style="text-align:right;">
+2190.76
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ASNIERES-SUR-SEINE
+</td>
+<td style="text-align:right;">
+28370
+</td>
+<td style="text-align:right;">
+4.83
+</td>
+<td style="text-align:right;">
+0.11
+</td>
+<td style="text-align:right;">
+1.43
+</td>
+<td style="text-align:right;">
+1825.72
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BAGNEUX
+</td>
+<td style="text-align:right;">
+21040
+</td>
+<td style="text-align:right;">
+4.19
+</td>
+<td style="text-align:right;">
+0.77
+</td>
+<td style="text-align:right;">
+2.20
+</td>
+<td style="text-align:right;">
+2093.14
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BOIS COLOMBES
+</td>
+<td style="text-align:right;">
+21040
+</td>
+<td style="text-align:right;">
+1.93
+</td>
+<td style="text-align:right;">
+0.04
+</td>
+<td style="text-align:right;">
+0.69
+</td>
+<td style="text-align:right;">
+2137.26
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BOULOGNE BILLANCOURT
+</td>
+<td style="text-align:right;">
+35040
+</td>
+<td style="text-align:right;">
+6.17
+</td>
+<td style="text-align:right;">
+0.32
+</td>
+<td style="text-align:right;">
+1.91
+</td>
+<td style="text-align:right;">
+1841.39
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BOURG LA REINE
+</td>
+<td style="text-align:right;">
+33700
+</td>
+<td style="text-align:right;">
+1.86
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1.02
+</td>
+<td style="text-align:right;">
+2460.15
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CHATENAY-MALABRY
+</td>
+<td style="text-align:right;">
+27140
+</td>
+<td style="text-align:right;">
+6.38
+</td>
+<td style="text-align:right;">
+1.95
+</td>
+<td style="text-align:right;">
+4.93
+</td>
+<td style="text-align:right;">
+1926.81
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CHATILLON
+</td>
+<td style="text-align:right;">
+30550
+</td>
+<td style="text-align:right;">
+2.93
+</td>
+<td style="text-align:right;">
+0.09
+</td>
+<td style="text-align:right;">
+1.22
+</td>
+<td style="text-align:right;">
+2204.83
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CHAVILLE
+</td>
+<td style="text-align:right;">
+32290
+</td>
+<td style="text-align:right;">
+3.58
+</td>
+<td style="text-align:right;">
+1.66
+</td>
+<td style="text-align:right;">
+2.89
+</td>
+<td style="text-align:right;">
+1599.69
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CLAMART
+</td>
+<td style="text-align:right;">
+29920
+</td>
+<td style="text-align:right;">
+8.76
+</td>
+<td style="text-align:right;">
+2.45
+</td>
+<td style="text-align:right;">
+5.47
+</td>
+<td style="text-align:right;">
+2487.41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CLICHY
+</td>
+<td style="text-align:right;">
+22410
+</td>
+<td style="text-align:right;">
+3.08
+</td>
+<td style="text-align:right;">
+0.09
+</td>
+<td style="text-align:right;">
+0.70
+</td>
+<td style="text-align:right;">
+2525.57
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+COLOMBES
+</td>
+<td style="text-align:right;">
+25100
+</td>
+<td style="text-align:right;">
+7.80
+</td>
+<td style="text-align:right;">
+0.39
+</td>
+<td style="text-align:right;">
+2.86
+</td>
+<td style="text-align:right;">
+2369.71
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+COURBEVOIE
+</td>
+<td style="text-align:right;">
+32080
+</td>
+<td style="text-align:right;">
+4.17
+</td>
+<td style="text-align:right;">
+0.15
+</td>
+<td style="text-align:right;">
+1.12
+</td>
+<td style="text-align:right;">
+2651.08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FONTENAY AUX ROSES
+</td>
+<td style="text-align:right;">
+26990
+</td>
+<td style="text-align:right;">
+2.53
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+<td style="text-align:right;">
+1.61
+</td>
+<td style="text-align:right;">
+1782.90
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GARCHES
+</td>
+<td style="text-align:right;">
+36150
+</td>
+<td style="text-align:right;">
+2.72
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+<td style="text-align:right;">
+2.11
+</td>
+<td style="text-align:right;">
+2058.33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GENNEVILLIERS
+</td>
+<td style="text-align:right;">
+18380
+</td>
+<td style="text-align:right;">
+11.64
+</td>
+<td style="text-align:right;">
+0.72
+</td>
+<td style="text-align:right;">
+3.42
+</td>
+<td style="text-align:right;">
+3949.53
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ISSY LES MOULINEAUX
+</td>
+<td style="text-align:right;">
+33650
+</td>
+<td style="text-align:right;">
+4.25
+</td>
+<td style="text-align:right;">
+0.37
+</td>
+<td style="text-align:right;">
+1.56
+</td>
+<td style="text-align:right;">
+2004.93
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LA GARENNE COLOMBES
+</td>
+<td style="text-align:right;">
+33090
+</td>
+<td style="text-align:right;">
+1.78
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.53
+</td>
+<td style="text-align:right;">
+2549.29
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LE PLESSIS ROBINSON
+</td>
+<td style="text-align:right;">
+31000
+</td>
+<td style="text-align:right;">
+3.41
+</td>
+<td style="text-align:right;">
+0.45
+</td>
+<td style="text-align:right;">
+1.86
+</td>
+<td style="text-align:right;">
+4959.55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LEVALLOIS PERRET
+</td>
+<td style="text-align:right;">
+34500
+</td>
+<td style="text-align:right;">
+2.41
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+0.47
+</td>
+<td style="text-align:right;">
+3109.04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MALAKOFF
+</td>
+<td style="text-align:right;">
+25810
+</td>
+<td style="text-align:right;">
+2.07
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.71
+</td>
+<td style="text-align:right;">
+1941.84
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MARNES LA COQUETTE
+</td>
+<td style="text-align:right;">
+41740
+</td>
+<td style="text-align:right;">
+3.48
+</td>
+<td style="text-align:right;">
+2.36
+</td>
+<td style="text-align:right;">
+3.22
+</td>
+<td style="text-align:right;">
+810.86
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MEUDON
+</td>
+<td style="text-align:right;">
+30680
+</td>
+<td style="text-align:right;">
+9.96
+</td>
+<td style="text-align:right;">
+4.07
+</td>
+<td style="text-align:right;">
+7.92
+</td>
+<td style="text-align:right;">
+1941.83
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MONTROUGE
+</td>
+<td style="text-align:right;">
+30500
+</td>
+<td style="text-align:right;">
+2.07
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+0.55
+</td>
+<td style="text-align:right;">
+2220.32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NANTERRE
+</td>
+<td style="text-align:right;">
+21620
+</td>
+<td style="text-align:right;">
+12.23
+</td>
+<td style="text-align:right;">
+0.73
+</td>
+<td style="text-align:right;">
+4.60
+</td>
+<td style="text-align:right;">
+2904.15
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NEUILLY SUR SEINE
+</td>
+<td style="text-align:right;">
+48010
+</td>
+<td style="text-align:right;">
+3.73
+</td>
+<td style="text-align:right;">
+0.06
+</td>
+<td style="text-align:right;">
+1.67
+</td>
+<td style="text-align:right;">
+3094.39
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PUTEAUX
+</td>
+<td style="text-align:right;">
+30980
+</td>
+<td style="text-align:right;">
+3.20
+</td>
+<td style="text-align:right;">
+0.08
+</td>
+<td style="text-align:right;">
+0.91
+</td>
+<td style="text-align:right;">
+4212.22
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RUEIL MALMAISON
+</td>
+<td style="text-align:right;">
+32980
+</td>
+<td style="text-align:right;">
+14.54
+</td>
+<td style="text-align:right;">
+2.76
+</td>
+<td style="text-align:right;">
+10.59
+</td>
+<td style="text-align:right;">
+2463.23
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SAINT CLOUD
+</td>
+<td style="text-align:right;">
+39760
+</td>
+<td style="text-align:right;">
+7.52
+</td>
+<td style="text-align:right;">
+3.07
+</td>
+<td style="text-align:right;">
+5.91
+</td>
+<td style="text-align:right;">
+2129.86
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SCEAUX
+</td>
+<td style="text-align:right;">
+36010
+</td>
+<td style="text-align:right;">
+3.60
+</td>
+<td style="text-align:right;">
+1.20
+</td>
+<td style="text-align:right;">
+2.79
+</td>
+<td style="text-align:right;">
+2489.21
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SEVRES
+</td>
+<td style="text-align:right;">
+33680
+</td>
+<td style="text-align:right;">
+3.93
+</td>
+<td style="text-align:right;">
+1.07
+</td>
+<td style="text-align:right;">
+2.96
+</td>
+<td style="text-align:right;">
+1900.91
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SURESNES
+</td>
+<td style="text-align:right;">
+31810
+</td>
+<td style="text-align:right;">
+3.79
+</td>
+<td style="text-align:right;">
+0.24
+</td>
+<td style="text-align:right;">
+1.89
+</td>
+<td style="text-align:right;">
+2389.70
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VANVES
+</td>
+<td style="text-align:right;">
+30770
+</td>
+<td style="text-align:right;">
+1.56
+</td>
+<td style="text-align:right;">
+0.05
+</td>
+<td style="text-align:right;">
+0.54
+</td>
+<td style="text-align:right;">
+1834.30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VAUCRESSON
+</td>
+<td style="text-align:right;">
+41320
+</td>
+<td style="text-align:right;">
+3.10
+</td>
+<td style="text-align:right;">
+0.39
+</td>
+<td style="text-align:right;">
+2.74
+</td>
+<td style="text-align:right;">
+2958.48
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VILLE D AVRAY
+</td>
+<td style="text-align:right;">
+38490
+</td>
+<td style="text-align:right;">
+3.69
+</td>
+<td style="text-align:right;">
+2.32
+</td>
+<td style="text-align:right;">
+3.34
+</td>
+<td style="text-align:right;">
+1510.90
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VILLENEUVE LA GARENNE
+</td>
+<td style="text-align:right;">
+18570
+</td>
+<td style="text-align:right;">
+3.20
+</td>
+<td style="text-align:right;">
+0.44
+</td>
+<td style="text-align:right;">
+1.36
+</td>
+<td style="text-align:right;">
+3066.97
+</td>
+</tr>
+</tbody>
+</table>
 <hr />
 </div>
 </div>

@@ -10,9 +10,8 @@
 
 
 
-<meta name="date" content="2026-04-18" />
 
-<title>Les données</title>
+<title>Description des données</title>
 
 <script src="site_libs/header-attrs-2.31/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -253,7 +252,7 @@ $(document).ready(function () {
   <a href="Géotraitement.html">Géotraitement</a>
 </li>
 <li>
-  <a href="Jointures-et-calculs.html">Jointures-et-calculs</a>
+  <a href="Jointures.html">Jointures</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -267,15 +266,84 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Les données</h1>
-<h4 class="date">2026-04-18</h4>
+<h1 class="title toc-ignore">Description des données</h1>
 
 </div>
 
 
-<div id="données" class="section level1">
-<h1>Données</h1>
-<p><em>Contenu à venir</em></p>
+<p>Pour cette étude, nous avons mobilisé trois types de sources afin
+d’affiner notre analyse spatiale et statistique :</p>
+<div id="données-raster" class="section level3">
+<h3>1. Données Raster</h3>
+<p>Afin d’identifier l’ensemble des surfaces végétalisées du département
+des <strong>Hauts-de-Seine (92)</strong>, nous avons exploité des images
+satellite <strong>Sentinel-2</strong> de type NDVI extraites via la
+plateforme <a href="https://browser.dataspace.copernicus.eu">Copernicus
+Browser</a>.</p>
+<p><strong>Le NDVI (Normalized Difference Vegetation Index) :</strong>
+Il s’agit d’un indice de végétation calculé à partir des bandes
+spectrales du rouge et de l’infrarouge proche. Il permet de mesurer la
+vigueur et la densité de la végétation : plus l’indice est proche de 1,
+plus la végétation est importante. <strong>Temporalité :</strong>
+Données de <strong>2026</strong>. <strong>Traitement :</strong> Ces
+données ont subi un géotraitement raster pour isoler les surfaces
+végétalisées par rapport au milieu urbain .</p>
+<p><strong>Couche NDVI découper selon les limites du
+département</strong> :</p>
+</div>
+<div id="section" class="section level2">
+<h2><img src="image_ndvi.png" alt="" width="30%" /></h2>
+<div id="données-cadastrales-et-géographiques" class="section level3">
+<h3>2. Données cadastrales et géographiques</h3>
+<p><strong>a) Communes du département</strong><br />
+Il s’agit de notre zone d’étude regroupant les <strong>36
+communes</strong> des Hauts-de-Seine. Extraite de la base <a
+href="https://cadastre.data.gouv.fr/datasets/cadastre-etalab">Cadastre
+Etalab</a>, ces données vectorielles nous ont permis de définir les
+limites administratives, de calculer la surface globale de chaque
+commune et de réaliser des découpages ainsi que des jointures
+attributaires.</p>
+<p><strong>b) Espaces naturels</strong><br />
+Pour affiner l’analyse, nous avons incorporé un jeu de données recensant
+les <strong>Espaces Naturels </strong> , gérés par la Direction du
+Département des Hauts-de-Seine.<br />
+L’objéctif est de comparer la couverture végétale brute (issue du
+raster) avec les zones officiellement gérées. <strong>Source :</strong>
+<a
+href="https://opendata.hauts-de-seine.fr/explore/dataset/espaces-naturels-sensibles-ens-et-espaces-naturels-associes-ena/information/">Open
+Data Hauts-de-Seine</a>, millésime <strong>2021</strong>.</p>
+<hr />
+</div>
+<div id="données-statistiques" class="section level3">
+<h3>3. Données statistiques</h3>
+<p><strong>a) Revenu médian par commune</strong><br />
+Données extraites de l’<strong>Observatoire des Territoires</strong>
+(source : Insee/Filosofi, <strong>2021</strong>).<br />
+Le revenu médian est le niveau de revenu qui partage la population en
+deux groupes égaux (50 % gagnent plus, 50 % gagnent moins). Il est
+l’indicateur le plus fidèle pour mesurer le niveau de vie réel des
+habitants.</p>
+<p><strong>b) Dépenses des collectivités par habitant</strong><br />
+Jeu de données extrait de l’<strong>OFGL</strong> (Observatoire des
+Finances et de la Gestion Publique Locale), millésime
+<strong>2024</strong>.<br />
+Cet indicateur correspond au montant annuel que la collectivité investit
+et dépense pour le fonctionnement des services publics par habitant. Il
+reflète la richesse budgétaire de la commune.</p>
+<hr />
+</div>
+<div id="création-de-lindice-de-richesse" class="section level3">
+<h3>Création de l’Indice de Richesse</h3>
+<p>La combinaison de ces deux sources statistiques nous a permis de
+classer les communes. Nous avons créé un <strong>indice de
+richesse</strong> synthétique selon la formule suivante :</p>
+<p><span class="math display">\[Indice\_Richesse = \frac{Revenu\_médian
++ Dépenses\_collectivité\_hab}{2}\]</span></p>
+<blockquote>
+<p>Cet indice permet de pondérer la richesse directe des ménages avec la
+capacité d’investissement de leur commune de résidence.</p>
+</blockquote>
+</div>
 </div>
 
 

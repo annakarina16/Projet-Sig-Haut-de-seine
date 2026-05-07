@@ -1,11 +1,57 @@
 ---
-title: "Les données"
+title: "Description des données"
 output: html_document
-date: "2026-04-18"
 ---
-# Données
 
-*Contenu à venir*
+Pour cette étude, nous avons mobilisé trois types de sources afin d'affiner notre analyse spatiale et statistique :
+
+### 1. Données Raster 
+Afin d'identifier l'ensemble des surfaces végétalisées du département des **Hauts-de-Seine (92)**, nous avons exploité des images satellite **Sentinel-2** de type NDVI extraites via la plateforme [Copernicus Browser](https://browser.dataspace.copernicus.eu).
+
+   **Le NDVI (Normalized Difference Vegetation Index) :** Il s'agit d'un indice de végétation calculé à partir des bandes spectrales du rouge et de l'infrarouge proche. Il permet de mesurer la vigueur et la densité de la végétation : plus l'indice est proche de 1, plus la végétation est importante.
+   **Temporalité :** Données de **2026**.
+   **Traitement :** Ces données ont subi un géotraitement raster pour isoler les surfaces végétalisées par rapport au milieu urbain .
+   
+   **Couche NDVI découper selon les limites du département** : 
+   
+```{r echo=FALSE, out.width="30%"}
+knitr::include_graphics("image_ndvi.png")
+```
+---
+
+### 2. Données cadastrales et géographiques
+
+**a) Communes du département**  
+Il s'agit de notre zone d'étude regroupant les **36 communes** des Hauts-de-Seine. Extraite de la base [Cadastre Etalab](https://cadastre.data.gouv.fr/datasets/cadastre-etalab), ces données vectorielles nous ont permis de définir les limites administratives, de calculer la surface globale de chaque commune et de réaliser des découpages ainsi que des jointures attributaires.
+
+**b) Espaces naturels**  
+Pour affiner l'analyse, nous avons incorporé un jeu de données recensant les **Espaces Naturels ** , gérés par la Direction du Département des Hauts-de-Seine.  
+L'objéctif est de comparer la couverture végétale brute (issue du raster) avec les zones officiellement gérées.
+   **Source :** [Open Data Hauts-de-Seine](https://opendata.hauts-de-seine.fr/explore/dataset/espaces-naturels-sensibles-ens-et-espaces-naturels-associes-ena/information/), millésime **2021**.
+
+---
+
+### 3. Données statistiques
+
+**a) Revenu médian par commune**  
+Données extraites de l'**Observatoire des Territoires** (source : Insee/Filosofi, **2021**).  
+ Le revenu médian est le niveau de revenu qui partage la population en deux groupes égaux (50 % gagnent plus, 50 % gagnent moins). Il est l'indicateur le plus fidèle pour mesurer le niveau de vie réel des habitants.
+
+**b) Dépenses des collectivités par habitant**  
+Jeu de données extrait de l'**OFGL** (Observatoire des Finances et de la Gestion Publique Locale), millésime **2024**.  
+ Cet indicateur correspond au montant annuel que la collectivité investit et dépense pour le fonctionnement des services publics par habitant. Il reflète la richesse budgétaire de la commune.
+
+---
+
+### Création de l'Indice de Richesse
+
+La combinaison de ces deux sources statistiques nous a permis de classer les communes. Nous avons créé un **indice de richesse** synthétique selon la formule suivante :
+
+$$Indice\_Richesse = \frac{Revenu\_médian + Dépenses\_collectivité\_hab}{2}$$
+
+> Cet indice permet de pondérer la richesse directe des ménages avec la capacité d'investissement de leur commune de résidence.
+
+
 
 
 

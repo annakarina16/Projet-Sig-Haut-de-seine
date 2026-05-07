@@ -47,8 +47,6 @@ Données extraites de l'**Observatoire des Territoires** (source : Insee/Filosof
 Jeu de données extrait de l'**OFGL** (Observatoire des Finances et de la Gestion Publique Locale), millésime **2024**.  
  Cet indicateur correspond au montant annuel que la collectivité investit et dépense pour le fonctionnement des services publics par habitant. Il reflète la richesse budgétaire de la commune.
  
- **Répartition des espaces naturels du département des Hauts-de-Seine** : 
- 
 
 ---
 
@@ -60,6 +58,39 @@ $$Indice\_Richesse = \frac{Revenu\_médian + Dépenses\_collectivité\_hab}{2}$$
 
 > Cet indice permet de pondérer la richesse directe des ménages avec la capacité d'investissement de leur commune de résidence.
 
+```{r echo=FALSE, message=FALSE}
+library(knitr)
+library(kableExtra)
+
+df <- data.frame(
+  Commune = c("Asnières-sur-Seine","Antony","Bagneux","Bois-Colombes",
+              "Boulogne-Billancourt","Bourg-la-Reine","Châtenay-Malabry",
+              "Châtillon","Chaville","Clamart","Clichy","Colombes",
+              "Courbevoie","Fontenay-aux-Roses","Garches","Gennevilliers",
+              "Issy-les-Moulineaux","La Garenne-Colombes","Le Plessis-Robinson",
+              "Levallois-Perret","Malakoff","Marnes-la-Coquette","Meudon",
+              "Montrouge","Nanterre","Neuilly-sur-Seine","Puteaux",
+              "Rueil-Malmaison","Saint-Cloud","Sceaux","Sèvres","Suresnes",
+              "Vanves","Vaucresson","Ville-d'Avray","Villeneuve-la-Garenne"),
+  Revenu_median = c(28370,32000,21040,21040,35040,33700,27140,30550,32290,
+                    29920,22410,25100,32080,26990,36150,18380,33650,33090,
+                    31000,34500,25810,41740,30680,30500,21620,48010,30980,
+                    32980,39760,36010,33680,31810,30770,41320,38490,18570),
+  Montant_par_habitant_2024 = c(1825.7,2190.8,2093.1,2137.3,1841.4,2460.1,
+                                 1926.8,2204.8,1599.7,2487.4,2525.6,2369.7,
+                                 2651.1,1782.9,2058.3,3949.5,2004.9,2549.3,
+                                 4959.6,3109.0,1941.8,810.9,1941.8,2220.3,
+                                 2904.1,3094.4,4212.2,2463.2,2129.9,2489.2,
+                                 1900.9,2389.7,1834.3,2958.5,1510.9,3067.0)
+)
+
+kable(df,
+      col.names = c("Commune", "Revenu médian (€)", "Montant par habitant 2024 (€)"),
+      align = c("l", "r", "r"),
+      format.args = list(big.mark = " ")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE)
+```
 
 
 

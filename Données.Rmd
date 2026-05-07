@@ -28,6 +28,12 @@ Il s'agit de notre zone d'étude regroupant les **36 communes** des Hauts-de-Sei
 Pour affiner l'analyse, nous avons incorporé un jeu de données recensant les **Espaces Naturels ** , gérés par la Direction du Département des Hauts-de-Seine.  
 L'objéctif est de comparer la couverture végétale brute (issue du raster) avec les zones officiellement gérées.
    **Source :** [Open Data Hauts-de-Seine](https://opendata.hauts-de-seine.fr/explore/dataset/espaces-naturels-sensibles-ens-et-espaces-naturels-associes-ena/information/), millésime **2021**.
+   
+   **Répartition des espaces naturels du département des Hauts-de-Seine** : 
+   
+```{r echo=FALSE, out.width="40%"}
+knitr::include_graphics("Repartition_EN.png")
+```
 
 ---
 
@@ -40,6 +46,9 @@ Données extraites de l'**Observatoire des Territoires** (source : Insee/Filosof
 **b) Dépenses des collectivités par habitant**  
 Jeu de données extrait de l'**OFGL** (Observatoire des Finances et de la Gestion Publique Locale), millésime **2024**.  
  Cet indicateur correspond au montant annuel que la collectivité investit et dépense pour le fonctionnement des services publics par habitant. Il reflète la richesse budgétaire de la commune.
+ 
+ **Répartition des espaces naturels du département des Hauts-de-Seine** : 
+ 
 
 ---
 

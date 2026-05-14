@@ -15,14 +15,34 @@
 
 
 
-**Sujet du projet :** **Les espaces verts et la végétation sont-ils un marqueur socio-économique ? Cas du département des Hauts-de-Seine**
-
-**Résultats de l'étude:**
 
 
+**INTRODUCTION**
+
+Le département des Hauts-de-Seine (92) présente un paradoxe territorial marquant : il est à la fois l'un des territoires les plus denses de la métropole parisienne et l'un des plus contrastés sur le plan social et environnemental. Dans un contexte de réchauffement climatique et d'urbanisation croissante, la présence de végétation n'est plus seulement un enjeu esthétique, mais un véritable facteur de santé publique et de qualité de vie. 
+
+Cependant, l'accès à ce "capital vert" est-il équitablement réparti ? Nous pouvons nous demander : **les espaces verts et la végétation sont-ils un marqueur socio-économique dans le département des Hauts-de-Seine ?**
+
+### Méthodologie et Plan d'analyse
+
+Pour répondre à cette problématique, notre étude s'articulera autour de trois axes principaux :
+
+1. **Analyse du couvert végétal par approche hybride**  
+   Nous quantifierons la présence de la végétation en croisant l'imagerie satellitaire (calcul de l'indice **NDVI** pour mesurer la vigueur de la biomasse) et les données administratives (inventaire des espaces naturels et parcs publics).
+
+2. **Caractérisation socio-économique du territoire**  
+   Nous établirons un classement des communes du département, de la plus précaire à la plus aisée, en nous appuyant sur des indicateurs statistiques clés tels que le **revenu médian** et les **dépenses des collectivités par habitant**.
+
+3. **Croisement des données et analyse de corrélation**  
+   Enfin, nous confronterons ces deux dimensions pour vérifier l'existence d'une corrélation entre la richesse d'une commune et son taux de végétalisation, afin de déterminer si la "nature en ville" suit une logique de ségrégation spatiale.
 
 
-**1- RÉPARTITIONS DES ESPACES VERTS ET DE LA VÉGÉTATION AU NIVEAU DES HAUTS-DE-SEINE:**
+
+---
+
+
+
+**I- RÉPARTITIONS DES ESPACES VERTS ET DE LA VÉGÉTATION AU NIVEAU DES HAUTS-DE-SEINE:**
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 library(sf)
@@ -67,60 +87,8 @@ mf_layout(title = "Espaces naturels et zones de végétation - Hauts-de-Seine", 
 
 
 
-**2-CLASSEMENT DES COMMUNES DE LA PLUS RICHE A LA PLUS PAUVRE SUIVANT LE TAUX DE RICHESSE :**
+**II-CLASSEMENT DES COMMUNES DE LA PLUS RICHE A LA PLUS PAUVRE SUIVANT LE TAUX DE RICHESSE :**
 
-```{r echo=FALSE, message=FALSE}
-library(knitr)
-library(kableExtra)
-
-df <- data.frame(
-  Commune = c("Asnières-sur-Seine","Antony","Bagneux","Bois-Colombes",
-              "Boulogne-Billancourt","Bourg-la-Reine","Châtenay-Malabry",
-              "Châtillon","Chaville","Clamart","Clichy","Colombes",
-              "Courbevoie","Fontenay-aux-Roses","Garches","Gennevilliers",
-              "Issy-les-Moulineaux","La Garenne-Colombes","Le Plessis-Robinson",
-              "Levallois-Perret","Malakoff","Marnes-la-Coquette","Meudon",
-              "Montrouge","Nanterre","Neuilly-sur-Seine","Puteaux",
-              "Rueil-Malmaison","Saint-Cloud","Sceaux","Sèvres","Suresnes",
-              "Vanves","Vaucresson","Ville-d'Avray","Villeneuve-la-Garenne"),
-  Revenu_median = c(28370,32000,21040,21040,35040,33700,27140,30550,32290,
-                    29920,22410,25100,32080,26990,36150,18380,33650,33090,
-                    31000,34500,25810,41740,30680,30500,21620,48010,30980,
-                    32980,39760,36010,33680,31810,30770,41320,38490,18570),
-  Montant_par_habitant = c(1825.7,2190.8,2093.1,2137.3,1841.4,2460.1,
-                            1926.8,2204.8,1599.7,2487.4,2525.6,2369.7,
-                            2651.1,1782.9,2058.3,3949.5,2004.9,2549.3,
-                            4959.6,3109.0,1941.8,810.9,1941.8,2220.3,
-                            2904.1,3094.4,4212.2,2463.2,2129.9,2489.2,
-                            1900.9,2389.7,1834.3,2958.5,1510.9,3067.0)
-)
-
-# ── OPTION A : ta formule brute ──────────────────────────────
-# df$Indice <- round((df$Revenu_median + df$Montant_par_habitant) / 2, 1)
-
-# ── OPTION B : normalisation min-max (recommandée) ───────────
-minmax <- function(x) (x - min(x)) / (max(x) - min(x))
-
-df$Indice <- round(
-  (minmax(df$Revenu_median) * 0.5 + minmax(df$Montant_par_habitant) * 0.5) * 100,
-  1
-)
-
-# ── TRI du plus riche au plus pauvre ─────────────────────────
-df <- df[order(-df$Indice), ]
-
-# ── TABLEAU ──────────────────────────────────────────────────
-kable(df[, c("Indice", "Commune", "Revenu_median", "Montant_par_habitant")],
-      col.names = c("Indice de richesse", "Commune",
-                    "Revenu médian (€)", "Dépenses/hab. 2024 (€)"),
-      align = c("c", "l", "r", "r"),
-      row.names = FALSE,
-      format.args = list(big.mark = " ")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
-                full_width = FALSE) %>%
-  column_spec(1, bold = TRUE, color = "white",
-              background = spec_color(df$Indice, option = "D", direction = 1))
-```
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 library(dplyr)
@@ -166,7 +134,7 @@ kable(tab_indice,
   column_spec(4, bold = TRUE, color = ifelse(tab_indice$indice_richesse > 50, "darkgreen", "black"))
 ```
 
-**3- D'OCCUPATION DES SOLS PAR LA VÉGÉTATION ET LES ESPACES VERTS POUR CHAQUE COMMUNE**
+**III- D'OCCUPATION DES SOLS PAR LA VÉGÉTATION ET LES ESPACES VERTS POUR CHAQUE COMMUNE**
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 library(sf)
 library(dplyr)
@@ -340,3 +308,21 @@ ggplot(donnees_long, aes(x = nom, y = taux, fill = type)) +
     legend.position = "top"
   )
 ```
+
+<div style="max-height: 200px; overflow-y: auto; background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 8px; font-family: sans-serif; line-height: 1.6;">
+
+### Conclusion
+
+Au terme de cette étude croisant indicateurs biophysiques et données socio-économiques, les résultats nuancent l'hypothèse de départ. Contrairement aux idées reçues sur la ségrégation environnementale, **la répartition de la végétation dans les Hauts-de-Seine ne semble pas suivre une corrélation directe et systématique avec le niveau de richesse des communes.**
+
+L'analyse met en lumière plusieurs points clés :
+
+*   **L'absence de lien de causalité strict :** Si certaines communes aisées bénéficient d'un cadre verdoyant, le haut du classement de la richesse ne coïncide pas nécessairement avec les taux de végétalisation les plus élevés. L'exemple le plus frappant est celui de **Marnes-la-Coquette** : bien que située en milieu de tableau dans le classement des revenus et des dépenses par habitant, elle arrive largement en tête en termes de végétation et d'espaces naturels. 
+
+*   **Le biais des massifs forestiers :** L'étude révèle que les taux de végétation globaux sont fortement influencés par la présence de grandes forêts départementales et domaniales (Meudon, Fausses-Reposes, etc.). Ces poumons verts gonflent les statistiques de quelques communes. En revanche, dans les **communes purement urbaines**, les taux de végétalisation se lissent et se valent sensiblement, indépendamment du niveau de richesse.
+
+*   **Fiabilité de la méthodologie :** Ce travail a fait l'objet d'une double vérification technique. Le traitement des données a été réalisé de manière indépendante sur **ArcGIS** et **R**. La convergence parfaite des mesures obtenue confirme la robustesse de nos calculs de surface et de l'indice NDVI.
+
+En conclusion, la structure du paysage végétal des Hauts-de-Seine semble davantage héritée de la géographie historique et des choix d'aménagement passés que d'une distribution basée sur le niveau de vie actuel.
+
+</div>

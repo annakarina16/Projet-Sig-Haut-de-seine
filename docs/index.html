@@ -283,11 +283,44 @@ les Hauts-de-Seine</h1>
 <li>Simon Meyer-Mommaerts - Rédacteur</li>
 <li>Adel Abdelaziz Zeboudj - Technique</li>
 </ul>
-<p><strong>Sujet du projet :</strong> <strong>Les espaces verts et la
-végétation sont-ils un marqueur socio-économique ? Cas du département
-des Hauts-de-Seine</strong></p>
-<p><strong>Résultats de l’étude:</strong></p>
-<p><strong>1- RÉPARTITIONS DES ESPACES VERTS ET DE LA VÉGÉTATION AU
+<p><strong>INTRODUCTION</strong></p>
+<p>Le département des Hauts-de-Seine (92) présente un paradoxe
+territorial marquant : il est à la fois l’un des territoires les plus
+denses de la métropole parisienne et l’un des plus contrastés sur le
+plan social et environnemental. Dans un contexte de réchauffement
+climatique et d’urbanisation croissante, la présence de végétation n’est
+plus seulement un enjeu esthétique, mais un véritable facteur de santé
+publique et de qualité de vie.</p>
+<p>Cependant, l’accès à ce “capital vert” est-il équitablement réparti ?
+Nous pouvons nous demander : <strong>les espaces verts et la végétation
+sont-ils un marqueur socio-économique dans le département des
+Hauts-de-Seine ?</strong></p>
+<div id="méthodologie-et-plan-danalyse" class="section level3">
+<h3>Méthodologie et Plan d’analyse</h3>
+<p>Pour répondre à cette problématique, notre étude s’articulera autour
+de trois axes principaux :</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Analyse du couvert végétal par approche
+hybride</strong><br />
+Nous quantifierons la présence de la végétation en croisant l’imagerie
+satellitaire (calcul de l’indice <strong>NDVI</strong> pour mesurer la
+vigueur de la biomasse) et les données administratives (inventaire des
+espaces naturels et parcs publics).</p></li>
+<li><p><strong>Caractérisation socio-économique du
+territoire</strong><br />
+Nous établirons un classement des communes du département, de la plus
+précaire à la plus aisée, en nous appuyant sur des indicateurs
+statistiques clés tels que le <strong>revenu médian</strong> et les
+<strong>dépenses des collectivités par habitant</strong>.</p></li>
+<li><p><strong>Croisement des données et analyse de
+corrélation</strong><br />
+Enfin, nous confronterons ces deux dimensions pour vérifier l’existence
+d’une corrélation entre la richesse d’une commune et son taux de
+végétalisation, afin de déterminer si la “nature en ville” suit une
+logique de ségrégation spatiale.</p></li>
+</ol>
+<hr />
+<p><strong>I- RÉPARTITIONS DES ESPACES VERTS ET DE LA VÉGÉTATION AU
 NIVEAU DES HAUTS-DE-SEINE:</strong></p>
 <pre class="r"><code>library(sf)
 library(terra)
@@ -328,532 +361,8 @@ legend(
 )
 mf_layout(title = &quot;Espaces naturels et zones de végétation - Hauts-de-Seine&quot;, scale = TRUE, arrow = TRUE)</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-1-1.png" alt="" width="672" /></p>
-<p><strong>2-CLASSEMENT DES COMMUNES DE LA PLUS RICHE A LA PLUS PAUVRE
+<p><strong>II-CLASSEMENT DES COMMUNES DE LA PLUS RICHE A LA PLUS PAUVRE
 SUIVANT LE TAUX DE RICHESSE :</strong></p>
-<table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:center;">
-Indice de richesse
-</th>
-<th style="text-align:left;">
-Commune
-</th>
-<th style="text-align:right;">
-Revenu médian (€)
-</th>
-<th style="text-align:right;">
-Dépenses/hab. 2024 (€)
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(253, 231, 37, 255) !important;">
-77.5
-</td>
-<td style="text-align:left;">
-Neuilly-sur-Seine
-</td>
-<td style="text-align:right;">
-48 010
-</td>
-<td style="text-align:right;">
-3 094.4
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(184, 222, 41, 255) !important;">
-71.3
-</td>
-<td style="text-align:left;">
-Le Plessis-Robinson
-</td>
-<td style="text-align:right;">
-31 000
-</td>
-<td style="text-align:right;">
-4 959.6
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(108, 205, 90, 255) !important;">
-64.6
-</td>
-<td style="text-align:left;">
-Vaucresson
-</td>
-<td style="text-align:right;">
-41 320
-</td>
-<td style="text-align:right;">
-2 958.5
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(86, 198, 103, 255) !important;">
-62.3
-</td>
-<td style="text-align:left;">
-Puteaux
-</td>
-<td style="text-align:right;">
-30 980
-</td>
-<td style="text-align:right;">
-4 212.2
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(36, 170, 131, 255) !important;">
-54.9
-</td>
-<td style="text-align:left;">
-Levallois-Perret
-</td>
-<td style="text-align:right;">
-34 500
-</td>
-<td style="text-align:right;">
-3 109.0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(31, 158, 137, 255) !important;">
-52.0
-</td>
-<td style="text-align:left;">
-Saint-Cloud
-</td>
-<td style="text-align:right;">
-39 760
-</td>
-<td style="text-align:right;">
-2 129.9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(31, 149, 139, 255) !important;">
-50.0
-</td>
-<td style="text-align:left;">
-Sceaux
-</td>
-<td style="text-align:right;">
-36 010
-</td>
-<td style="text-align:right;">
-2 489.2
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(37, 132, 142, 255) !important;">
-45.8
-</td>
-<td style="text-align:left;">
-La Garenne-Colombes
-</td>
-<td style="text-align:right;">
-33 090
-</td>
-<td style="text-align:right;">
-2 549.3
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(37, 131, 142, 255) !important;">
-45.7
-</td>
-<td style="text-align:left;">
-Bourg-la-Reine
-</td>
-<td style="text-align:right;">
-33 700
-</td>
-<td style="text-align:right;">
-2 460.1
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(38, 130, 142, 255) !important;">
-45.3
-</td>
-<td style="text-align:left;">
-Courbevoie
-</td>
-<td style="text-align:right;">
-32 080
-</td>
-<td style="text-align:right;">
-2 651.1
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(38, 129, 142, 255) !important;">
-45.0
-</td>
-<td style="text-align:left;">
-Garches
-</td>
-<td style="text-align:right;">
-36 150
-</td>
-<td style="text-align:right;">
-2 058.3
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(39, 127, 142, 255) !important;">
-44.6
-</td>
-<td style="text-align:left;">
-Rueil-Malmaison
-</td>
-<td style="text-align:right;">
-32 980
-</td>
-<td style="text-align:right;">
-2 463.2
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(42, 118, 142, 255) !important;">
-42.4
-</td>
-<td style="text-align:left;">
-Ville-d’Avray
-</td>
-<td style="text-align:right;">
-38 490
-</td>
-<td style="text-align:right;">
-1 510.9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(44, 115, 142, 255) !important;">
-41.7
-</td>
-<td style="text-align:left;">
-Suresnes
-</td>
-<td style="text-align:right;">
-31 810
-</td>
-<td style="text-align:right;">
-2 389.7
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(46, 110, 142, 255) !important;">
-40.5
-</td>
-<td style="text-align:left;">
-Boulogne-Billancourt
-</td>
-<td style="text-align:right;">
-35 040
-</td>
-<td style="text-align:right;">
-1 841.4
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(46, 109, 142, 255) !important;">
-40.2
-</td>
-<td style="text-align:left;">
-Issy-les-Moulineaux
-</td>
-<td style="text-align:right;">
-33 650
-</td>
-<td style="text-align:right;">
-2 004.9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(47, 107, 142, 255) !important;">
-39.7
-</td>
-<td style="text-align:left;">
-Clamart
-</td>
-<td style="text-align:right;">
-29 920
-</td>
-<td style="text-align:right;">
-2 487.4
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(48, 106, 142, 255) !important;">
-39.6
-</td>
-<td style="text-align:left;">
-Antony
-</td>
-<td style="text-align:right;">
-32 000
-</td>
-<td style="text-align:right;">
-2 190.8
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(48, 105, 142, 255) !important;">
-39.4
-</td>
-<td style="text-align:left;">
-Marnes-la-Coquette
-</td>
-<td style="text-align:right;">
-41 740
-</td>
-<td style="text-align:right;">
-810.9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(49, 104, 142, 255) !important;">
-39.0
-</td>
-<td style="text-align:left;">
-Sèvres
-</td>
-<td style="text-align:right;">
-33 680
-</td>
-<td style="text-align:right;">
-1 900.9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(51, 98, 141, 255) !important;">
-37.8
-</td>
-<td style="text-align:left;">
-Gennevilliers
-</td>
-<td style="text-align:right;">
-18 380
-</td>
-<td style="text-align:right;">
-3 949.5
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(52, 96, 141, 255) !important;">
-37.4
-</td>
-<td style="text-align:left;">
-Montrouge
-</td>
-<td style="text-align:right;">
-30 500
-</td>
-<td style="text-align:right;">
-2 220.3
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(52, 96, 141, 255) !important;">
-37.3
-</td>
-<td style="text-align:left;">
-Châtillon
-</td>
-<td style="text-align:right;">
-30 550
-</td>
-<td style="text-align:right;">
-2 204.8
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(59, 82, 139, 255) !important;">
-34.4
-</td>
-<td style="text-align:left;">
-Meudon
-</td>
-<td style="text-align:right;">
-30 680
-</td>
-<td style="text-align:right;">
-1 941.8
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(61, 77, 138, 255) !important;">
-33.2
-</td>
-<td style="text-align:left;">
-Vanves
-</td>
-<td style="text-align:right;">
-30 770
-</td>
-<td style="text-align:right;">
-1 834.3
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(62, 76, 138, 255) !important;">
-33.0
-</td>
-<td style="text-align:left;">
-Chaville
-</td>
-<td style="text-align:right;">
-32 290
-</td>
-<td style="text-align:right;">
-1 599.7
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(66, 64, 134, 255) !important;">
-30.7
-</td>
-<td style="text-align:left;">
-Nanterre
-</td>
-<td style="text-align:right;">
-21 620
-</td>
-<td style="text-align:right;">
-2 904.1
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(67, 61, 132, 255) !important;">
-30.1
-</td>
-<td style="text-align:left;">
-Colombes
-</td>
-<td style="text-align:right;">
-25 100
-</td>
-<td style="text-align:right;">
-2 369.7
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(69, 56, 130, 255) !important;">
-29.1
-</td>
-<td style="text-align:left;">
-Asnières-sur-Seine
-</td>
-<td style="text-align:right;">
-28 370
-</td>
-<td style="text-align:right;">
-1 825.7
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(70, 51, 127, 255) !important;">
-28.2
-</td>
-<td style="text-align:left;">
-Châtenay-Malabry
-</td>
-<td style="text-align:right;">
-27 140
-</td>
-<td style="text-align:right;">
-1 926.8
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(71, 47, 125, 255) !important;">
-27.5
-</td>
-<td style="text-align:left;">
-Clichy
-</td>
-<td style="text-align:right;">
-22 410
-</td>
-<td style="text-align:right;">
-2 525.6
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(71, 47, 125, 255) !important;">
-27.5
-</td>
-<td style="text-align:left;">
-Villeneuve-la-Garenne
-</td>
-<td style="text-align:right;">
-18 570
-</td>
-<td style="text-align:right;">
-3 067.0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(72, 40, 120, 255) !important;">
-26.2
-</td>
-<td style="text-align:left;">
-Fontenay-aux-Roses
-</td>
-<td style="text-align:right;">
-26 990
-</td>
-<td style="text-align:right;">
-1 782.9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(72, 40, 120, 255) !important;">
-26.2
-</td>
-<td style="text-align:left;">
-Malakoff
-</td>
-<td style="text-align:right;">
-25 810
-</td>
-<td style="text-align:right;">
-1 941.8
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(69, 5, 89, 255) !important;">
-20.5
-</td>
-<td style="text-align:left;">
-Bois-Colombes
-</td>
-<td style="text-align:right;">
-21 040
-</td>
-<td style="text-align:right;">
-2 137.3
-</td>
-</tr>
-<tr>
-<td style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(68, 1, 84, 255) !important;">
-19.9
-</td>
-<td style="text-align:left;">
-Bagneux
-</td>
-<td style="text-align:right;">
-21 040
-</td>
-<td style="text-align:right;">
-2 093.1
-</td>
-</tr>
-</tbody>
-</table>
 <pre class="r"><code>library(dplyr)
 library(kableExtra)
 
@@ -1422,7 +931,7 @@ Bagneux
 </tr>
 </tbody>
 </table>
-<p><strong>3- D’OCCUPATION DES SOLS PAR LA VÉGÉTATION ET LES ESPACES
+<p><strong>III- D’OCCUPATION DES SOLS PAR LA VÉGÉTATION ET LES ESPACES
 VERTS POUR CHAQUE COMMUNE</strong></p>
 <pre class="r"><code>library(sf)
 library(dplyr)
@@ -2007,7 +1516,45 @@ ggplot(donnees_long, aes(x = nom, y = taux, fill = type)) +
     plot.title = element_text(face = &quot;bold&quot;, size = 13),
     legend.position = &quot;top&quot;
   )</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" alt="" width="672" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" alt="" width="672" /></p>
+</div>
+<div id="conclusion" class="section level3"
+style="max-height: 200px; overflow-y: auto; background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 8px; font-family: sans-serif; line-height: 1.6;">
+<h3>Conclusion</h3>
+<p>Au terme de cette étude croisant indicateurs biophysiques et données
+socio-économiques, les résultats nuancent l’hypothèse de départ.
+Contrairement aux idées reçues sur la ségrégation environnementale,
+<strong>la répartition de la végétation dans les Hauts-de-Seine ne
+semble pas suivre une corrélation directe et systématique avec le niveau
+de richesse des communes.</strong></p>
+<p>L’analyse met en lumière plusieurs points clés :</p>
+<ul>
+<li><p><strong>L’absence de lien de causalité strict :</strong> Si
+certaines communes aisées bénéficient d’un cadre verdoyant, le haut du
+classement de la richesse ne coïncide pas nécessairement avec les taux
+de végétalisation les plus élevés. L’exemple le plus frappant est celui
+de <strong>Marnes-la-Coquette</strong> : bien que située en milieu de
+tableau dans le classement des revenus et des dépenses par habitant,
+elle arrive largement en tête en termes de végétation et d’espaces
+naturels.</p></li>
+<li><p><strong>Le biais des massifs forestiers :</strong> L’étude révèle
+que les taux de végétation globaux sont fortement influencés par la
+présence de grandes forêts départementales et domaniales (Meudon,
+Fausses-Reposes, etc.). Ces poumons verts gonflent les statistiques de
+quelques communes. En revanche, dans les <strong>communes purement
+urbaines</strong>, les taux de végétalisation se lissent et se valent
+sensiblement, indépendamment du niveau de richesse.</p></li>
+<li><p><strong>Fiabilité de la méthodologie :</strong> Ce travail a fait
+l’objet d’une double vérification technique. Le traitement des données a
+été réalisé de manière indépendante sur <strong>ArcGIS</strong> et
+<strong>R</strong>. La convergence parfaite des mesures obtenue confirme
+la robustesse de nos calculs de surface et de l’indice NDVI.</p></li>
+</ul>
+<p>En conclusion, la structure du paysage végétal des Hauts-de-Seine
+semble davantage héritée de la géographie historique et des choix
+d’aménagement passés que d’une distribution basée sur le niveau de vie
+actuel.</p>
+</div>
 </div>
 
 

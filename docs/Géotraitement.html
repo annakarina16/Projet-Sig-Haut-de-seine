@@ -278,88 +278,39 @@ $(document).ready(function () {
 
 <div id="géotraitement-raster" class="section level2">
 <h2>1- Géotraitement Raster</h2>
+</div>
+<div id="traitement-raster" class="section level2">
+<h2>Traitement Raster</h2>
+<p>Le traitement raster repose sur l’exploitation d’une image NDVI issue
+du Copernicus Browser, exportée au format GeoTIFF 16 bits. Le fichier
+contient trois bandes, dont la bande 2 correspond à l’indice de
+végétation NDVI.</p>
+<p>Dans un premier temps, la bande 2 a été extraite puis
+<strong>reprojetée</strong> dans le système de coordonnées Lambert 93
+(EPSG 2154) afin d’assurer la cohérence spatiale avec les autres couches
+du projet.</p>
+<p>L’image a ensuite été <strong>découpée</strong> selon l’emprise du
+département des Hauts-de-Seine, puis <strong>masquée</strong> pour ne
+conserver que les pixels situés à l’intérieur des limites
+communales.</p>
+<p>Les valeurs brutes du fichier étant encodées en uint16 (de 0 à
+65535), une <strong>conversion</strong> a été appliquée pour ramener les
+valeurs dans l’intervalle NDVI standard de -1 à +1, selon la formule
+suivante :</p>
+<p><span class="math display">\[NDVI_{réel} =
+-\left(\frac{valeur}{65535} \times 2 - 1\right)\]</span></p>
+<p>L’inversion du signe a été nécessaire car les valeurs étaient
+inversées dans le fichier source, la végétation présentant des valeurs
+négatives.</p>
+<p>Un <strong>seuillage</strong> a ensuite été appliqué en ne conservant
+que les pixels dont la valeur NDVI est supérieure à 0,3, correspondant
+aux zones de végétation significative. Ce masque binaire a enfin été
+<strong>vectorisé</strong> en polygones grâce à la fonction
+<code>terra::as.polygons</code>, permettant de passer du domaine raster
+au domaine vecteur.</p>
 <p><strong>Schéma de géotraitement :</strong></p>
-<div class="grViz html-widget html-fill-item" id="htmlwidget-dfa132cb6abf42736f9f" style="width:672px;height:480px;"></div>
-<script type="application/json" data-for="htmlwidget-dfa132cb6abf42736f9f">{"x":{"diagram":"\ndigraph schema_raster {\n  graph [rankdir = TB, fontname = Helvetica]\n\n  node [shape = rectangle, style = filled, fillcolor = \"#d4edda\", fontname = Helvetica, fontsize = 10]\n  NDVI [label = \"NDVIF.tiff\\n(Bande 2)\"]\n  NDVI_repr [label = \"NDVI reprojeté\\n(Lambert 93)\"]\n  NDVI_crop [label = \"NDVI découpé\\n(emprise communes)\"]\n  NDVI_mask [label = \"NDVI masqué\\n(zone étude)\"]\n  NDVI_reel [label = \"NDVI réel\\n(-1 à +1)\"]\n  NDVI_seuil [label = \"Masque binaire\\n(NDVI > 0.3)\"]\n  poly_veg [label = \"Polygones végétation\\n(vecteur)\"]\n\n  node [shape = diamond, style = filled, fillcolor = \"#fff3cd\", fontname = Helvetica, fontsize = 10]\n  reproj1 [label = \"Reprojection\\nEPSG 2154\"]\n  crop [label = \"Découpage\\n(crop)\"]\n  mask [label = \"Masquage\\n(mask)\"]\n  convert [label = \"Conversion\\nvaleurs uint16\"]\n  seuil [label = \"Seuillage\\n> 0.3\"]\n  vecto [label = \"Vectorisation\\n(as.polygons)\"]\n\n  NDVI -> reproj1 -> NDVI_repr\n  NDVI_repr -> crop -> NDVI_crop\n  NDVI_crop -> mask -> NDVI_mask\n  NDVI_mask -> convert -> NDVI_reel\n  NDVI_reel -> seuil -> NDVI_seuil\n  NDVI_seuil -> vecto -> poly_veg\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
-<ul>
-<li>Dans un premier temps, nous avons reprojeté et découpé l’image NDVI
-d’après les limites administratives du département des
-Hauts-de-Seine.</li>
-</ul>
-<pre class="r"><code># CE BLOC CALCULE ET AFFICHE LA CARTE
-library(sf)
-library(terra)
-library(mapsf)
-
-img &lt;- terra::rast(&quot;NDVIF.tiff&quot;)
-communes_hds &lt;- sf::st_read(&quot;communes.shp&quot;, quiet = TRUE)
-hds_contour &lt;- sf::st_transform(communes_hds, 2154) |&gt; sf::st_union()
-layer_v &lt;- img[[2]]
-hds_terra &lt;- terra::vect(hds_contour)
-ndvi_hds &lt;- terra::project(layer_v, sf::st_crs(hds_contour)$wkt) |&gt; 
-            terra::crop(hds_terra) |&gt; 
-            terra::mask(hds_terra)
-stats &lt;- terra::minmax(ndvi_hds)
-ndvi_norm &lt;- (ndvi_hds - stats[1]) / (stats[2] - stats[1])
-ndvi_final &lt;- 1 - ndvi_norm 
-
-mf_theme(&quot;default&quot;)
-mapsf::mf_raster(x = ndvi_final, pal = mf_get_pal(n = 10, palette = &quot;RdYlGn&quot;), 
-                 breaks = &quot;equal&quot;, nbreaks = 10, leg_title = &quot;Indice Végétation&quot;, leg_val_rnd = 2)
-mapsf::mf_map(hds_contour, col = NA, border = &quot;black&quot;, lwd = 1.5, add = TRUE)
-mf_layout(title = &quot;NDVI découpé&quot;, scale = TRUE, arrow = TRUE)</code></pre>
-<p><img src="G%C3%A9otraitement_files/figure-html/unnamed-chunk-2-1.png" alt="" width="672" /></p>
-<pre class="r"><code>veg_mask &lt;- ndvi_final &gt; 0.6  
-veg_mask[veg_mask == 0] &lt;- NA 
-poly_veg &lt;- terra::as.polygons(veg_mask) |&gt; sf::st_as_sf()</code></pre>
-<ul>
-<li>Enfin, grâce à l’outil « Raster vers polygones », on obtient des
-polygones qui représentent les espaces végétalisés dans le département
-des Hauts-de-Seine.</li>
-</ul>
-<pre class="r"><code>veg_mask &lt;- ndvi_hds &gt; 0.3
-
-veg_mask[veg_mask == 0] &lt;- NA
-
-poly_veg &lt;- terra::as.polygons(veg_mask, aggregate = TRUE) |&gt; sf::st_as_sf()
-
-mf_theme(&quot;default&quot;)
-
-mf_map(hds_contour, col = &quot;#f0f0f0&quot;, border = &quot;grey&quot;)
-
-mf_map(
-  x = poly_veg, 
-  col = &quot;forestgreen&quot;, 
-  border = &quot;darkgreen&quot;, 
-  lwd = 0.5, 
-  add = TRUE
-)
-
-mf_layout(title = &quot;Zones de végétation vectorisées (Seuil &gt; 0.3)&quot;, scale = TRUE)</code></pre>
-<p><img src="G%C3%A9otraitement_files/figure-html/unnamed-chunk-3-1.png" alt="" width="672" /></p>
-<div id="géotraitement-vecteur" class="section level3">
-<h3>2- Géotraitement vecteur</h3>
-<p><strong>Schéma de géotraitement :</strong></p>
-<p><img src="V1.png" alt="" width="70%" /></p>
-<ul>
-<li>Les deux couches vecteurs (« Végétation des Hauts-de-Seine » et «
-Espaces naturels du département ») ont subi le même traitement. Nous
-avons d’abord fusionné les polygones de ces couches afin d’obtenir une
-entité unique pour chaque donnée car le géotraitement raster génère des
-milliers de micro-polygones risquant de créer des erreurs ou des
-lenteurs de calcul.</li>
-</ul>
-<p><img src="V2.png" alt="" width="20%" /></p>
-<ul>
-<li>Ensuite, nous avons intersecté séparément ces couches avec la couche
-des communes. Cela permet d’obtenir, pour chaque commune, les polygones
-représentant sa végétation et ses espaces verts propres. À noter que
-cette intersection facilite également les futures jointures de
-données.</li>
-</ul>
-<p><img src="V3.png" alt="" width="20%" /></p>
-<p><strong>Répartition de la végétation et des espaces naturels dans le
-92:</strong></p>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-4e80ec3cfe93fb7485f4" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-4e80ec3cfe93fb7485f4">{"x":{"diagram":"\ndigraph schema_raster {\n  graph [rankdir = LR, fontname = Helvetica]\n\n  node [shape = rectangle, style = filled, fillcolor = \"#d4edda\", fontname = Helvetica, fontsize = 10]\n  NDVI [label = \"NDVIF.tiff\\n(Bande 2)\"]\n  NDVI_repr [label = \"NDVI reprojeté\\n(Lambert 93)\"]\n  NDVI_crop [label = \"NDVI découpé\\n(emprise communes)\"]\n  NDVI_mask [label = \"NDVI masqué\\n(zone étude)\"]\n  NDVI_reel [label = \"NDVI réel\\n(-1 à +1)\"]\n  NDVI_seuil [label = \"Masque binaire\\n(NDVI > 0.3)\"]\n  poly_veg [label = \"Polygones végétation\\n(vecteur)\"]\n\n  node [shape = diamond, style = filled, fillcolor = \"#fff3cd\", fontname = Helvetica, fontsize = 10]\n  reproj1 [label = \"Reprojection\\nEPSG 2154\"]\n  crop [label = \"Découpage\\n(crop)\"]\n  mask [label = \"Masquage\\n(mask)\"]\n  convert [label = \"Conversion\\nvaleurs uint16\"]\n  seuil [label = \"Seuillage\\n> 0.3\"]\n  vecto [label = \"Vectorisation\\n(as.polygons)\"]\n\n  NDVI -> reproj1 -> NDVI_repr -> crop -> NDVI_crop -> mask -> NDVI_mask -> convert -> NDVI_reel -> seuil -> NDVI_seuil -> vecto -> poly_veg\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>library(sf)
 library(terra)
 library(mapsf)
@@ -381,23 +332,7 @@ mapsf::mf_raster(x = ndvi_reel, pal = rev(mf_get_pal(n = 10, palette = &quot;RdY
                  breaks = &quot;equal&quot;, nbreaks = 10, leg_title = &quot;Indice Végétation&quot;, leg_val_rnd = 2)
 mapsf::mf_map(hds_contour, col = NA, border = &quot;black&quot;, lwd = 1.5, add = TRUE)
 mf_layout(title = &quot;NDVI découpé sur les Hauts-de-Seine&quot;, scale = TRUE, arrow = TRUE)</code></pre>
-<p><img src="G%C3%A9otraitement_files/figure-html/unnamed-chunk-7-1.png" alt="" width="672" /></p>
-<pre class="r"><code>veg_mask = ndvi_reel &gt; 0.3
-veg_mask[veg_mask == 0] = NA
-poly_veg_temp = terra::as.polygons(veg_mask, aggregate = TRUE)
-poly_veg = sf::st_as_sf(poly_veg_temp)
-
-mf_theme(&quot;default&quot;)
-mf_map(hds_contour, col = &quot;#f0f0f0&quot;, border = &quot;grey&quot;)
-mf_map(
-  x = poly_veg,
-  col = &quot;forestgreen&quot;,
-  border = &quot;darkgreen&quot;,
-  lwd = 0.5,
-  add = TRUE
-)
-mf_layout(title = &quot;Zones de végétation vectorisées (Seuil &gt; 0.3)&quot;, scale = TRUE)</code></pre>
-<p><img src="G%C3%A9otraitement_files/figure-html/unnamed-chunk-8-1.png" alt="" width="672" /></p>
+<p><img src="G%C3%A9otraitement_files/figure-html/unnamed-chunk-2-1.png" alt="" width="672" /></p>
 <pre class="r"><code>veg_mask = ndvi_reel &gt; 0.3
 veg_mask[veg_mask == 0] = NA
 poly_veg_temp = terra::as.polygons(veg_mask, aggregate = TRUE)
@@ -413,7 +348,43 @@ mf_map(
   add = TRUE
 )
 mf_layout(title = &quot;Zones de végétation vectorisées (Seuil &gt; 0.3)&quot;, scale = TRUE)</code></pre>
-<p><img src="G%C3%A9otraitement_files/figure-html/unnamed-chunk-9-1.png" alt="" width="672" /></p>
+<p><img src="G%C3%A9otraitement_files/figure-html/unnamed-chunk-3-1.png" alt="" width="672" /></p>
+<div id="géotraitement-vecteur" class="section level3">
+<h3>2- Géotraitement vecteur</h3>
+</div>
+</div>
+<div id="traitement-vecteur" class="section level2">
+<h2>Traitement Vecteur</h2>
+<p>Le traitement vecteur s’appuie sur trois couches géographiques : les
+limites communales des Hauts-de-Seine (<code>communes.shp</code>), les
+espaces naturels du département (<code>ENF.shp</code>) et les polygones
+de végétation issus de la vectorisation du raster NDVI.</p>
+<p>Dans un premier temps, les couches <code>communes.shp</code> et
+<code>ENF.shp</code> ont été <strong>reprojetées</strong> en Lambert 93
+(EPSG 2154) afin d’assurer la cohérence des systèmes de coordonnées
+entre toutes les couches.</p>
+<p>Les communes ont ensuite été <strong>dissoutes</strong> via une union
+spatiale (<code>st_union</code>) pour constituer le contour global du
+département, utilisé comme zone d’étude lors du traitement raster.</p>
+<p>Deux <strong>intersections spatiales</strong> ont ensuite été
+réalisées :</p>
+<ul>
+<li>Une première intersection entre les <strong>polygones de végétation
+NDVI</strong> et les limites communales, permettant de calculer la
+surface végétalisée pour chaque commune.</li>
+<li>Une seconde intersection entre les <strong>espaces naturels</strong>
+et les limites communales, permettant de calculer la surface d’espaces
+naturels pour chaque commune.</li>
+</ul>
+<p>Ces intersections ont permis de calculer pour chaque commune sa
+surface totale, sa surface végétalisée et sa surface en espaces
+naturels, exprimées en hectares, constituant la base des analyses
+statistiques et cartographiques réalisées par la suite.</p>
+<p><strong>Schéma de géotraitement :</strong></p>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-49bf5e812f49e6bea83a" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-49bf5e812f49e6bea83a">{"x":{"diagram":"\ndigraph schema_vecteur {\n  graph [rankdir = LR, fontname = Helvetica]\n\n  node [shape = rectangle, style = filled, fillcolor = \"#cce5ff\", fontname = Helvetica, fontsize = 10]\n  communes [label = \"communes.shp\"]\n  communes_repr [label = \"Communes reprojetées\\n(Lambert 93)\"]\n  hds_contour [label = \"Contour HDS\\n(union communes)\"]\n  espaces_nat [label = \"ENF.shp\"]\n  espaces_repr [label = \"Espaces naturels\\nreprojetés (Lambert 93)\"]\n  poly_veg [label = \"Polygones végétation\\n(depuis raster)\"]\n  inter_veg [label = \"Végétation\\npar commune (ha)\"]\n  inter_en [label = \"Espaces naturels\\npar commune (ha)\"]\n\n  node [shape = diamond, style = filled, fillcolor = \"#fff3cd\", fontname = Helvetica, fontsize = 10]\n  reproj2 [label = \"Reprojection\\nEPSG 2154\"]\n  union [label = \"Dissolution\\n(st_union)\"]\n  reproj3 [label = \"Reprojection\\nEPSG 2154\"]\n  intersect1 [label = \"Intersection\\n(st_intersection)\"]\n  intersect2 [label = \"Intersection\\n(st_intersection)\"]\n\n  communes -> reproj2 -> communes_repr -> union -> hds_contour\n  espaces_nat -> reproj3 -> espaces_repr -> intersect2\n  communes_repr -> intersect2 -> inter_en\n  poly_veg -> intersect1\n  communes_repr -> intersect1 -> inter_veg\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p><strong>Répartition de la végétation et des espaces naturels dans le
+92:</strong></p>
 <pre class="r"><code>library(sf)
 library(mapsf)
 library(terra)
@@ -436,7 +407,7 @@ legend(
   bty = &quot;n&quot;
 )
 mf_layout(title = &quot;Répartition des espaces naturels du département des Hauts-de-Seine&quot;, scale = TRUE, arrow = TRUE)</code></pre>
-<p><img src="G%C3%A9otraitement_files/figure-html/unnamed-chunk-10-1.png" alt="" width="672" /></p>
+<p><img src="G%C3%A9otraitement_files/figure-html/unnamed-chunk-5-1.png" alt="" width="672" /></p>
 <pre class="r"><code>library(sf)
 library(dplyr)
 
@@ -711,7 +682,6 @@ knitr::kable(tableau, caption = &quot;Surface végétation et espaces naturels p
 </table>
 <hr />
 <hr />
-</div>
 </div>
 
 

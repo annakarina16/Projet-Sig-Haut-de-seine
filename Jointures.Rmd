@@ -3,113 +3,69 @@ title: "Jointures"
 output: html_document
 ---
 
-## 3- Jointures et calculs
+## 3- Jointures 
 
-### Calculs (ArcGIS Pro)
+## Jointures attributaires
 
-Avant de procéder aux jointures, nous avons calculé les surfaces géométriques dans **ArcGIS Pro** :
+Les jointures attributaires ont permis de consolider l'ensemble des données spatiales et statistiques à l'échelle communale.
 
-*   **Surface totale** des communes.
+Dans un premier temps, une **jointure entre les deux tableaux CSV** a été réalisée. Le fichier `tableau1.csv` contenant les montants de dépenses par habitant 2024 et le fichier `tableau2.csv` contenant les revenus médians ont été joints sur les champs **`INSEE`** (tableau1) et **`id`** (tableau2). Ces deux champs contiennent les codes INSEE des communes et ont été préalablement convertis en caractères afin d'assurer la compatibilité des types entre les deux tables, le champ `INSEE` étant initialement de type entier et le champ `id` de type caractère.
 
-*   **Surface de la végétation** (issue du traitement raster).
+Dans un second temps, une **jointure entre les surfaces communales et les données socio-économiques** a été effectuée sur les champs **`id`** (couche communes) et **`INSEE`** (tab_joint). Le champ `id` de la couche communale correspond au code INSEE de chaque commune et a également été converti en caractère pour assurer la compatibilité.
 
-*   **Surface des espaces naturels**.
+Deux **jointures intermédiaires** ont également été réalisées entre les surfaces calculées lors du traitement vecteur et la table des surfaces communales, en utilisant le champ **`nom`** comme clé de jointure :
 
-Ces indicateurs permettent de normaliser les données pour comparer l'occupation du sol entre les différentes communes du département.
+- Jointure entre la surface communale et la surface végétalisée NDVI sur le champ **`nom`**
+- Jointure entre ce résultat et la surface des espaces naturels sur le champ **`nom`**
 
+Cette jointure finale a permis de rassembler dans un seul tableau les informations suivantes pour chaque commune :
 
-### Jointures (sous R)
+- La surface totale de la commune en hectares
+- La surface végétalisée issue du NDVI en hectares
+- La surface en espaces naturels en hectares
+- Le montant des dépenses par habitant 2024 en euros
+- Le revenu médian en euros
 
-La consolidation des données a été effectuée sous **R**. Nous avons réalisé des jointures attributaires pour fusionner les cinq sources d'informations :
+À partir de ce tableau consolidé, deux indicateurs ont été calculés :
 
-1.  **Revenu médian** par habitant.
+- Le **taux de végétation** et le **taux d'espaces naturels**, exprimés en pourcentage de la surface communale
+- Un **indice de richesse** composite, calculé selon la formule suivante :
 
-2.  **Dépenses des collectivités**.
+$$\text{Indice de richesse} = \left(\frac{R - R_{min}}{R_{max} - R_{min}} \times 0{,}5 + \frac{D - D_{min}}{D_{max} - D_{min}} \times 0{,}5\right) \times 100$$
 
-3.  **Limites administratives** (communes).
+Où $R$ représente le revenu médian et $D$ le montant des dépenses par habitant, permettant de classer les communes des Hauts-de-Seine selon leur niveau de richesse relative.
 
-4.  **Végétation** (NDVI).
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+library(DiagrammeR)
 
-5.  **Espaces naturels**.
+grViz("
+digraph schema_jointures {
+  graph [rankdir = LR, fontname = Helvetica]
 
-Le résultat final est une table unique regroupant par commune : les surfaces (en km²), le niveau de richesse et les investissements publics.
+  node [shape = rectangle, style = filled, fillcolor = '#f8d7da', fontname = Helvetica, fontsize = 10]
+  tab1 [label = 'tableau1.csv\\n(Montant par habitant)']
+  tab2 [label = 'tableau2.csv\\n(Revenu médian)']
+  tab_joint [label = 'tab_joint\\n(tab1 + tab2)']
+  inter_veg [label = 'Végétation\\npar commune (ha)']
+  inter_en [label = 'Espaces naturels\\npar commune (ha)']
+  surface_commune [label = 'Surface\\npar commune (ha)']
+  tableau_final [label = 'Tableau final\\n(toutes données)']
+  indice [label = 'Indice de richesse\\n(par commune)']
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
-library(knitr)
-library(kableExtra)
-```
+  node [shape = diamond, style = filled, fillcolor = '#fff3cd', fontname = Helvetica, fontsize = 10]
+  join1 [label = 'Jointure\\nInsee = id']
+  join2 [label = 'Jointure\\nnom = nom']
+  join3 [label = 'Jointure\\nnom = nom']
+  join4 [label = 'Jointure\\nid = Insee']
+  calcul [label = 'Calcul\\nindice richesse']
 
-```{r tableau}
-data <- data.frame(
-  Commune = c("ANTONY", "ASNIERES-SUR-SEINE", "BAGNEUX", "BOIS COLOMBES",
-              "BOULOGNE BILLANCOURT", "BOURG LA REINE", "CHATENAY-MALABRY",
-              "CHATILLON", "CHAVILLE", "CLAMART", "CLICHY", "COLOMBES",
-              "COURBEVOIE", "FONTENAY AUX ROSES", "GARCHES", "GENNEVILLIERS",
-              "ISSY LES MOULINEAUX", "LA GARENNE COLOMBES", "LE PLESSIS ROBINSON",
-              "LEVALLOIS PERRET", "MALAKOFF", "MARNES LA COQUETTE", "MEUDON",
-              "MONTROUGE", "NANTERRE", "NEUILLY SUR SEINE", "PUTEAUX",
-              "RUEIL MALMAISON", "SAINT CLOUD", "SCEAUX", "SEVRES", "SURESNES",
-              "VANVES", "VAUCRESSON", "VILLE D AVRAY", "VILLENEUVE LA GARENNE"),
-
-  Revenu_med = c(32000, 28370, 21040, 21040, 35040, 33700, 27140, 30550, 32290,
-                 29920, 22410, 25100, 32080, 26990, 36150, 18380, 33650, 33090,
-                 31000, 34500, 25810, 41740, 30680, 30500, 21620, 48010, 30980,
-                 32980, 39760, 36010, 33680, 31810, 30770, 41320, 38490, 18570),
-
-  Surface = c(9.557815146310000, 4.828881626010000, 4.188994688390000, 1.927464962080000,
-              6.170325686120000, 1.859911924470000, 6.376546022970000, 2.925581834310000,
-              3.578090814820000, 8.763404827870000, 3.079858658790000, 7.804983453470000,
-              4.168488241320000, 2.531173572160000, 2.716514273310000, 11.641090557200000,
-              4.248017733140000, 1.780541260540000, 3.410721499830000, 2.413411034670000,
-              2.073203724340000, 3.484097885630000, 9.957039282000000, 2.066166724280000,
-              12.228815774299999, 3.726614340500000, 3.198351501730000, 14.538027503000000,
-              7.516335565340000, 3.601167824610000, 3.929845043090000, 3.785670990120000,
-              1.556651538610000, 3.098865430920000, 3.690149582010000, 3.199770339990000),
-
-  Surface_EspaceV = c(1.064470254084854, 0.106414037123549, 0.766333917500005, 0.043385853431359,
-                      0.316893559260522, NA, 1.952494726220264, 0.086003710844039,
-                      1.660489374160722, 2.448317559638556, 0.092738288513823, 0.392472856729701,
-                      0.154214474104788, 0.119777886092657, 0.066859373560183, 0.719113212299319,
-                      0.365822745208511, 0.005473085067460, 0.447531434415215, 0.103239879347240,
-                      0.012330972569705, 2.356784246308874, 4.066845415001946, 0.019561936624372,
-                      0.732982882662323, 0.056337349715494, 0.082018530058359, 2.760464413635914,
-                      3.068660817568122, 1.200982009962211, 1.068475506084175, 0.243579795622504,
-                      0.050451247630547, 0.389692117605131, 2.319894627658148, 0.439069266410887),
-
-  Surface_m2 = c(5.856768581816638, 1.434504185283249, 2.197979569132722, 0.692988897019375,
-                 1.908618505614598, 1.016612438634587, 4.929901264831430, 1.220689151417686,
-                 2.890318187974107, 5.471686417227625, 0.703339628241229, 2.863817768572616,
-                 1.118694271588546, 1.614003410375512, 2.108404460575023, 3.417967072578957,
-                 1.562699786543301, 0.528741524730523, 1.864943055536388, 0.470161565542107,
-                 0.707071985436374, 3.217172599880343, 7.921902421986929, 0.549183532062959,
-                 4.604731653206714, 1.665053053880500, 0.911651772011345, 10.589156985655816,
-                 5.913711289172923, 2.791235687512220, 2.961768207883127, 1.888849981018323,
-                 0.540645310708275, 2.736644082217525, 3.339756087837356, 1.364182906076096),
-
-  Montant_par_hab_2024 = c(2190.76, 1825.72, 2093.14, 2137.26, 1841.39, 2460.15, 1926.81,
-                            2204.83, 1599.69, 2487.41, 2525.57, 2369.71, 2651.08, 1782.90,
-                            2058.33, 3949.53, 2004.93, 2549.29, 4959.55, 3109.04, 1941.84,
-                            810.86, 1941.83, 2220.32, 2904.15, 3094.39, 4212.22, 2463.23,
-                            2129.86, 2489.21, 1900.91, 2389.70, 1834.30, 2958.48, 1510.90,
-                            3066.97)
-)
-
-kable(
-  data,
-  format    = "html",
-  digits    = 2,
-  col.names = c("Commune", "Revenu médian (€)", "Surface (km²)",
-                "Surface espaces verts (km²)", "Surface végétation (km²)",
-                "Dépenses/hab. 2024 (€)"),
-  align     = c("l", "r", "r", "r", "r", "r")
-) %>%
-  kable_styling(
-    bootstrap_options = c("striped", "hover"),
-    full_width        = TRUE,
-    font_size         = 14
-  ) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#2C3E50")
+  tab1 -> join1
+  tab2 -> join1 -> tab_joint -> join4
+  surface_commune -> join2
+  inter_veg -> join2 -> join3
+  inter_en -> join3 -> join4 -> tableau_final -> calcul -> indice
+}
+")
 ```
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}

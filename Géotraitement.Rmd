@@ -7,8 +7,38 @@ output: html_document
 
 **Schéma de géotraitement :**
 
-```{r echo=FALSE, out.width="70%"}
-knitr::include_graphics("communes département.png")
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(DiagrammeR)
+
+grViz("
+digraph schema_raster {
+  graph [rankdir = TB, fontname = Helvetica]
+
+  node [shape = rectangle, style = filled, fillcolor = '#d4edda', fontname = Helvetica, fontsize = 10]
+  NDVI [label = 'NDVIF.tiff\\n(Bande 2)']
+  NDVI_repr [label = 'NDVI reprojeté\\n(Lambert 93)']
+  NDVI_crop [label = 'NDVI découpé\\n(emprise communes)']
+  NDVI_mask [label = 'NDVI masqué\\n(zone étude)']
+  NDVI_reel [label = 'NDVI réel\\n(-1 à +1)']
+  NDVI_seuil [label = 'Masque binaire\\n(NDVI > 0.3)']
+  poly_veg [label = 'Polygones végétation\\n(vecteur)']
+
+  node [shape = diamond, style = filled, fillcolor = '#fff3cd', fontname = Helvetica, fontsize = 10]
+  reproj1 [label = 'Reprojection\\nEPSG 2154']
+  crop [label = 'Découpage\\n(crop)']
+  mask [label = 'Masquage\\n(mask)']
+  convert [label = 'Conversion\\nvaleurs uint16']
+  seuil [label = 'Seuillage\\n> 0.3']
+  vecto [label = 'Vectorisation\\n(as.polygons)']
+
+  NDVI -> reproj1 -> NDVI_repr
+  NDVI_repr -> crop -> NDVI_crop
+  NDVI_crop -> mask -> NDVI_mask
+  NDVI_mask -> convert -> NDVI_reel
+  NDVI_reel -> seuil -> NDVI_seuil
+  NDVI_seuil -> vecto -> poly_veg
+}
+")
 ```
 
 

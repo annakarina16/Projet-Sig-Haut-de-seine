@@ -32,6 +32,11 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet" />
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="site_libs/viz-1.8.2/viz.js"></script>
+<link href="site_libs/DiagrammeR-styles-0.2/styles.css" rel="stylesheet" />
+<script src="site_libs/grViz-binding-1.0.12/grViz.js"></script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -274,7 +279,8 @@ $(document).ready(function () {
 <div id="géotraitement-raster" class="section level2">
 <h2>1- Géotraitement Raster</h2>
 <p><strong>Schéma de géotraitement :</strong></p>
-<p><img src="communes%20d%C3%A9partement.png" alt="" width="70%" /></p>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-dfa132cb6abf42736f9f" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-dfa132cb6abf42736f9f">{"x":{"diagram":"\ndigraph schema_raster {\n  graph [rankdir = TB, fontname = Helvetica]\n\n  node [shape = rectangle, style = filled, fillcolor = \"#d4edda\", fontname = Helvetica, fontsize = 10]\n  NDVI [label = \"NDVIF.tiff\\n(Bande 2)\"]\n  NDVI_repr [label = \"NDVI reprojeté\\n(Lambert 93)\"]\n  NDVI_crop [label = \"NDVI découpé\\n(emprise communes)\"]\n  NDVI_mask [label = \"NDVI masqué\\n(zone étude)\"]\n  NDVI_reel [label = \"NDVI réel\\n(-1 à +1)\"]\n  NDVI_seuil [label = \"Masque binaire\\n(NDVI > 0.3)\"]\n  poly_veg [label = \"Polygones végétation\\n(vecteur)\"]\n\n  node [shape = diamond, style = filled, fillcolor = \"#fff3cd\", fontname = Helvetica, fontsize = 10]\n  reproj1 [label = \"Reprojection\\nEPSG 2154\"]\n  crop [label = \"Découpage\\n(crop)\"]\n  mask [label = \"Masquage\\n(mask)\"]\n  convert [label = \"Conversion\\nvaleurs uint16\"]\n  seuil [label = \"Seuillage\\n> 0.3\"]\n  vecto [label = \"Vectorisation\\n(as.polygons)\"]\n\n  NDVI -> reproj1 -> NDVI_repr\n  NDVI_repr -> crop -> NDVI_crop\n  NDVI_crop -> mask -> NDVI_mask\n  NDVI_mask -> convert -> NDVI_reel\n  NDVI_reel -> seuil -> NDVI_seuil\n  NDVI_seuil -> vecto -> poly_veg\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 <ul>
 <li>Dans un premier temps, nous avons reprojeté et découpé l’image NDVI
 d’après les limites administratives du département des

@@ -23,7 +23,7 @@ Un **seuillage** a ensuite été appliqué en ne conservant que les pixels dont 
 
 **Schéma de géotraitement :**
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
 library(DiagrammeR)
 
 grViz("
@@ -121,7 +121,7 @@ Ces intersections ont permis de calculer pour chaque commune sa surface totale, 
 
 **Schéma de géotraitement :**
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
 library(DiagrammeR)
 
 grViz("

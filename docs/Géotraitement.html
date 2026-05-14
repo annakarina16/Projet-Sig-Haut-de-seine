@@ -309,8 +309,34 @@ aux zones de végétation significative. Ce masque binaire a enfin été
 <code>terra::as.polygons</code>, permettant de passer du domaine raster
 au domaine vecteur.</p>
 <p><strong>Schéma de géotraitement :</strong></p>
-<div class="grViz html-widget html-fill-item" id="htmlwidget-4e80ec3cfe93fb7485f4" style="width:672px;height:480px;"></div>
-<script type="application/json" data-for="htmlwidget-4e80ec3cfe93fb7485f4">{"x":{"diagram":"\ndigraph schema_raster {\n  graph [rankdir = LR, fontname = Helvetica]\n\n  node [shape = rectangle, style = filled, fillcolor = \"#d4edda\", fontname = Helvetica, fontsize = 10]\n  NDVI [label = \"NDVIF.tiff\\n(Bande 2)\"]\n  NDVI_repr [label = \"NDVI reprojeté\\n(Lambert 93)\"]\n  NDVI_crop [label = \"NDVI découpé\\n(emprise communes)\"]\n  NDVI_mask [label = \"NDVI masqué\\n(zone étude)\"]\n  NDVI_reel [label = \"NDVI réel\\n(-1 à +1)\"]\n  NDVI_seuil [label = \"Masque binaire\\n(NDVI > 0.3)\"]\n  poly_veg [label = \"Polygones végétation\\n(vecteur)\"]\n\n  node [shape = diamond, style = filled, fillcolor = \"#fff3cd\", fontname = Helvetica, fontsize = 10]\n  reproj1 [label = \"Reprojection\\nEPSG 2154\"]\n  crop [label = \"Découpage\\n(crop)\"]\n  mask [label = \"Masquage\\n(mask)\"]\n  convert [label = \"Conversion\\nvaleurs uint16\"]\n  seuil [label = \"Seuillage\\n> 0.3\"]\n  vecto [label = \"Vectorisation\\n(as.polygons)\"]\n\n  NDVI -> reproj1 -> NDVI_repr -> crop -> NDVI_crop -> mask -> NDVI_mask -> convert -> NDVI_reel -> seuil -> NDVI_seuil -> vecto -> poly_veg\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>library(DiagrammeR)
+
+grViz(&quot;
+digraph schema_raster {
+  graph [rankdir = LR, fontname = Helvetica]
+
+  node [shape = rectangle, style = filled, fillcolor = &#39;#d4edda&#39;, fontname = Helvetica, fontsize = 10]
+  NDVI [label = &#39;NDVIF.tiff\\n(Bande 2)&#39;]
+  NDVI_repr [label = &#39;NDVI reprojeté\\n(Lambert 93)&#39;]
+  NDVI_crop [label = &#39;NDVI découpé\\n(emprise communes)&#39;]
+  NDVI_mask [label = &#39;NDVI masqué\\n(zone étude)&#39;]
+  NDVI_reel [label = &#39;NDVI réel\\n(-1 à +1)&#39;]
+  NDVI_seuil [label = &#39;Masque binaire\\n(NDVI &gt; 0.3)&#39;]
+  poly_veg [label = &#39;Polygones végétation\\n(vecteur)&#39;]
+
+  node [shape = diamond, style = filled, fillcolor = &#39;#fff3cd&#39;, fontname = Helvetica, fontsize = 10]
+  reproj1 [label = &#39;Reprojection\\nEPSG 2154&#39;]
+  crop [label = &#39;Découpage\\n(crop)&#39;]
+  mask [label = &#39;Masquage\\n(mask)&#39;]
+  convert [label = &#39;Conversion\\nvaleurs uint16&#39;]
+  seuil [label = &#39;Seuillage\\n&gt; 0.3&#39;]
+  vecto [label = &#39;Vectorisation\\n(as.polygons)&#39;]
+
+  NDVI -&gt; reproj1 -&gt; NDVI_repr -&gt; crop -&gt; NDVI_crop -&gt; mask -&gt; NDVI_mask -&gt; convert -&gt; NDVI_reel -&gt; seuil -&gt; NDVI_seuil -&gt; vecto -&gt; poly_veg
+}
+&quot;)</code></pre>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-fd534abdb04c04f83a40" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-fd534abdb04c04f83a40">{"x":{"diagram":"\ndigraph schema_raster {\n  graph [rankdir = LR, fontname = Helvetica]\n\n  node [shape = rectangle, style = filled, fillcolor = \"#d4edda\", fontname = Helvetica, fontsize = 10]\n  NDVI [label = \"NDVIF.tiff\\n(Bande 2)\"]\n  NDVI_repr [label = \"NDVI reprojeté\\n(Lambert 93)\"]\n  NDVI_crop [label = \"NDVI découpé\\n(emprise communes)\"]\n  NDVI_mask [label = \"NDVI masqué\\n(zone étude)\"]\n  NDVI_reel [label = \"NDVI réel\\n(-1 à +1)\"]\n  NDVI_seuil [label = \"Masque binaire\\n(NDVI > 0.3)\"]\n  poly_veg [label = \"Polygones végétation\\n(vecteur)\"]\n\n  node [shape = diamond, style = filled, fillcolor = \"#fff3cd\", fontname = Helvetica, fontsize = 10]\n  reproj1 [label = \"Reprojection\\nEPSG 2154\"]\n  crop [label = \"Découpage\\n(crop)\"]\n  mask [label = \"Masquage\\n(mask)\"]\n  convert [label = \"Conversion\\nvaleurs uint16\"]\n  seuil [label = \"Seuillage\\n> 0.3\"]\n  vecto [label = \"Vectorisation\\n(as.polygons)\"]\n\n  NDVI -> reproj1 -> NDVI_repr -> crop -> NDVI_crop -> mask -> NDVI_mask -> convert -> NDVI_reel -> seuil -> NDVI_seuil -> vecto -> poly_veg\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>library(sf)
 library(terra)
 library(mapsf)
@@ -381,8 +407,38 @@ surface totale, sa surface végétalisée et sa surface en espaces
 naturels, exprimées en hectares, constituant la base des analyses
 statistiques et cartographiques réalisées par la suite.</p>
 <p><strong>Schéma de géotraitement :</strong></p>
-<div class="grViz html-widget html-fill-item" id="htmlwidget-49bf5e812f49e6bea83a" style="width:672px;height:480px;"></div>
-<script type="application/json" data-for="htmlwidget-49bf5e812f49e6bea83a">{"x":{"diagram":"\ndigraph schema_vecteur {\n  graph [rankdir = LR, fontname = Helvetica]\n\n  node [shape = rectangle, style = filled, fillcolor = \"#cce5ff\", fontname = Helvetica, fontsize = 10]\n  communes [label = \"communes.shp\"]\n  communes_repr [label = \"Communes reprojetées\\n(Lambert 93)\"]\n  hds_contour [label = \"Contour HDS\\n(union communes)\"]\n  espaces_nat [label = \"ENF.shp\"]\n  espaces_repr [label = \"Espaces naturels\\nreprojetés (Lambert 93)\"]\n  poly_veg [label = \"Polygones végétation\\n(depuis raster)\"]\n  inter_veg [label = \"Végétation\\npar commune (ha)\"]\n  inter_en [label = \"Espaces naturels\\npar commune (ha)\"]\n\n  node [shape = diamond, style = filled, fillcolor = \"#fff3cd\", fontname = Helvetica, fontsize = 10]\n  reproj2 [label = \"Reprojection\\nEPSG 2154\"]\n  union [label = \"Dissolution\\n(st_union)\"]\n  reproj3 [label = \"Reprojection\\nEPSG 2154\"]\n  intersect1 [label = \"Intersection\\n(st_intersection)\"]\n  intersect2 [label = \"Intersection\\n(st_intersection)\"]\n\n  communes -> reproj2 -> communes_repr -> union -> hds_contour\n  espaces_nat -> reproj3 -> espaces_repr -> intersect2\n  communes_repr -> intersect2 -> inter_en\n  poly_veg -> intersect1\n  communes_repr -> intersect1 -> inter_veg\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>library(DiagrammeR)
+
+grViz(&quot;
+digraph schema_vecteur {
+  graph [rankdir = LR, fontname = Helvetica]
+
+  node [shape = rectangle, style = filled, fillcolor = &#39;#cce5ff&#39;, fontname = Helvetica, fontsize = 10]
+  communes [label = &#39;communes.shp&#39;]
+  communes_repr [label = &#39;Communes reprojetées\\n(Lambert 93)&#39;]
+  hds_contour [label = &#39;Contour HDS\\n(union communes)&#39;]
+  espaces_nat [label = &#39;ENF.shp&#39;]
+  espaces_repr [label = &#39;Espaces naturels\\nreprojetés (Lambert 93)&#39;]
+  poly_veg [label = &#39;Polygones végétation\\n(depuis raster)&#39;]
+  inter_veg [label = &#39;Végétation\\npar commune (ha)&#39;]
+  inter_en [label = &#39;Espaces naturels\\npar commune (ha)&#39;]
+
+  node [shape = diamond, style = filled, fillcolor = &#39;#fff3cd&#39;, fontname = Helvetica, fontsize = 10]
+  reproj2 [label = &#39;Reprojection\\nEPSG 2154&#39;]
+  union [label = &#39;Dissolution\\n(st_union)&#39;]
+  reproj3 [label = &#39;Reprojection\\nEPSG 2154&#39;]
+  intersect1 [label = &#39;Intersection\\n(st_intersection)&#39;]
+  intersect2 [label = &#39;Intersection\\n(st_intersection)&#39;]
+
+  communes -&gt; reproj2 -&gt; communes_repr -&gt; union -&gt; hds_contour
+  espaces_nat -&gt; reproj3 -&gt; espaces_repr -&gt; intersect2
+  communes_repr -&gt; intersect2 -&gt; inter_en
+  poly_veg -&gt; intersect1
+  communes_repr -&gt; intersect1 -&gt; inter_veg
+}
+&quot;)</code></pre>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-faf72b60d63edb0aa7a5" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-faf72b60d63edb0aa7a5">{"x":{"diagram":"\ndigraph schema_vecteur {\n  graph [rankdir = LR, fontname = Helvetica]\n\n  node [shape = rectangle, style = filled, fillcolor = \"#cce5ff\", fontname = Helvetica, fontsize = 10]\n  communes [label = \"communes.shp\"]\n  communes_repr [label = \"Communes reprojetées\\n(Lambert 93)\"]\n  hds_contour [label = \"Contour HDS\\n(union communes)\"]\n  espaces_nat [label = \"ENF.shp\"]\n  espaces_repr [label = \"Espaces naturels\\nreprojetés (Lambert 93)\"]\n  poly_veg [label = \"Polygones végétation\\n(depuis raster)\"]\n  inter_veg [label = \"Végétation\\npar commune (ha)\"]\n  inter_en [label = \"Espaces naturels\\npar commune (ha)\"]\n\n  node [shape = diamond, style = filled, fillcolor = \"#fff3cd\", fontname = Helvetica, fontsize = 10]\n  reproj2 [label = \"Reprojection\\nEPSG 2154\"]\n  union [label = \"Dissolution\\n(st_union)\"]\n  reproj3 [label = \"Reprojection\\nEPSG 2154\"]\n  intersect1 [label = \"Intersection\\n(st_intersection)\"]\n  intersect2 [label = \"Intersection\\n(st_intersection)\"]\n\n  communes -> reproj2 -> communes_repr -> union -> hds_contour\n  espaces_nat -> reproj3 -> espaces_repr -> intersect2\n  communes_repr -> intersect2 -> inter_en\n  poly_veg -> intersect1\n  communes_repr -> intersect1 -> inter_veg\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 <p><strong>Répartition de la végétation et des espaces naturels dans le
 92:</strong></p>
 <pre class="r"><code>library(sf)

@@ -289,7 +289,45 @@ des Hauts-de-Seine</strong></p>
 <p><strong>Résultats de l’étude:</strong></p>
 <p><strong>1- RÉPARTITIONS DES ESPACES VERTS ET DE LA VÉGÉTATION AU
 NIVEAU DES HAUTS-DE-SEINE:</strong></p>
-<p><img src="V4.png" alt="" width="70%" /></p>
+<pre class="r"><code>library(sf)
+library(terra)
+library(mapsf)
+
+img = terra::rast(&quot;NDVIF.tiff&quot;)
+communes_hds = sf::st_read(&quot;communes.shp&quot;, quiet = TRUE)
+hds_contour = sf::st_transform(communes_hds, 2154) |&gt; sf::st_union()
+layer_v = img[[2]]
+hds_terra = terra::vect(hds_contour)
+
+ndvi_hds = terra::project(layer_v, sf::st_crs(hds_contour)$wkt) |&gt;
+           terra::crop(hds_terra) |&gt;
+           terra::mask(hds_terra)
+
+ndvi_reel = -((ndvi_hds / 65535) * 2 - 1)
+
+veg_mask = ndvi_reel &gt; 0.3
+veg_mask[veg_mask == 0] = NA
+poly_veg_temp = terra::as.polygons(veg_mask, aggregate = TRUE)
+poly_veg = sf::st_as_sf(poly_veg_temp)
+poly_veg = sf::st_intersection(poly_veg, hds_contour)
+
+espaces_naturels = sf::st_read(&quot;espaces-naturels-sensibles-ens-et-espaces-naturels-associes-ena.shp&quot;, quiet = TRUE)
+espaces_naturels = sf::st_transform(espaces_naturels, 2154)
+
+mf_theme(&quot;default&quot;)
+mf_map(communes_hds, col = &quot;#f0f0f0&quot;, border = &quot;grey&quot;, lwd = 0.8)
+mf_map(x = poly_veg, col = &quot;lightgreen&quot;, border = &quot;lightgreen&quot;, add = TRUE)
+mf_map(x = espaces_naturels, col = &quot;forestgreen&quot;, border = &quot;forestgreen&quot;, lwd = 0.5, add = TRUE)
+legend(
+  &quot;right&quot;,
+  legend = c(&quot;Espaces végétalisés NDVI &gt; 0.3&quot;, &quot;Espaces naturels&quot;),
+  fill = c(&quot;lightgreen&quot;, &quot;forestgreen&quot;),
+  border = c(&quot;lightgreen&quot;, &quot;forestgreen&quot;),
+  title = &quot;Légende&quot;,
+  bty = &quot;n&quot;
+)
+mf_layout(title = &quot;Espaces naturels et zones de végétation - Hauts-de-Seine&quot;, scale = TRUE, arrow = TRUE)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" alt="" width="672" /></p>
 <p><strong>2-CLASSEMENT DES COMMUNES DE LA PLUS RICHE A LA PLUS PAUVRE
 SUIVANT LE TAUX DE RICHESSE :</strong></p>
 <table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
@@ -816,19 +854,654 @@ Bagneux
 </tr>
 </tbody>
 </table>
-<strong>3- D’OCCUPATION DES SOLS PAR LA VÉGÉTATION ET LES ESPACES VERTS
-POUR CHAQUE COMMUNE</strong>
-<table class="table table-striped table-hover" style="font-size: 14px; margin-left: auto; margin-right: auto;">
+<pre class="r"><code>library(dplyr)
+library(kableExtra)
+
+tab1 = read.csv2(&quot;tableau1.csv&quot;)
+tab1$Insee = as.character(tab1$Insee)
+
+tab2 = read.csv2(&quot;tableau2.csv&quot;)
+tab2$id = as.character(tab2$id)
+
+tab_joint = tab1 |&gt;
+  left_join(tab2, by = c(&quot;Insee&quot; = &quot;id&quot;)) |&gt;
+  select(Insee, Nom, Montant_par_habitant_2024, Revenu_med)
+
+tab_indice = tab_joint |&gt;
+  mutate(
+    R_min = min(Revenu_med, na.rm = TRUE),
+    R_max = max(Revenu_med, na.rm = TRUE),
+    D_min = min(Montant_par_habitant_2024, na.rm = TRUE),
+    D_max = max(Montant_par_habitant_2024, na.rm = TRUE),
+    indice_richesse = (
+      ((Revenu_med - R_min) / (R_max - R_min)) * 0.5 +
+      ((Montant_par_habitant_2024 - D_min) / (D_max - D_min)) * 0.5
+    ) * 100
+  ) |&gt;
+  select(Nom, Revenu_med, Montant_par_habitant_2024, indice_richesse) |&gt;
+  mutate(indice_richesse = round(indice_richesse, 1)) |&gt;
+  arrange(desc(indice_richesse))
+
+kable(tab_indice,
+  col.names = c(&quot;Commune&quot;, &quot;Revenu médian (€)&quot;, &quot;Montant par habitant 2024 (€)&quot;, &quot;Indice de richesse&quot;),
+  caption = &quot;Classement des communes par indice de richesse&quot;,
+  align = c(&quot;l&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;)
+) |&gt;
+  kable_styling(
+    bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;bordered&quot;),
+    full_width = FALSE,
+    position = &quot;center&quot;,
+    font_size = 13
+  ) |&gt;
+  row_spec(0, bold = TRUE, background = &quot;#2d6a4f&quot;, color = &quot;white&quot;) |&gt;
+  column_spec(4, bold = TRUE, color = ifelse(tab_indice$indice_richesse &gt; 50, &quot;darkgreen&quot;, &quot;black&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed table-bordered" style="font-size: 13px; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Classement des communes par indice de richesse
+</caption>
 <thead>
 <tr>
-<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(39, 174, 96, 255) !important;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
 Commune
 </th>
-<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(39, 174, 96, 255) !important;">
-Taux de Végétation (%)
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
+Revenu médian (€)
 </th>
-<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(39, 174, 96, 255) !important;">
-Taux d’Espaces Verts (%)
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
+Montant par habitant 2024 (€)
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
+Indice de richesse
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Neuilly-sur-Seine
+</td>
+<td style="text-align:center;">
+48010
+</td>
+<td style="text-align:center;">
+3094.3927
+</td>
+<td style="text-align:center;font-weight: bold;color: darkgreen !important;">
+77.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Le Plessis-Robinson
+</td>
+<td style="text-align:center;">
+31000
+</td>
+<td style="text-align:center;">
+4959.5503
+</td>
+<td style="text-align:center;font-weight: bold;color: darkgreen !important;">
+71.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Vaucresson
+</td>
+<td style="text-align:center;">
+41320
+</td>
+<td style="text-align:center;">
+2958.4809
+</td>
+<td style="text-align:center;font-weight: bold;color: darkgreen !important;">
+64.6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Puteaux
+</td>
+<td style="text-align:center;">
+30980
+</td>
+<td style="text-align:center;">
+4212.2215
+</td>
+<td style="text-align:center;font-weight: bold;color: darkgreen !important;">
+62.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Levallois-Perret
+</td>
+<td style="text-align:center;">
+34500
+</td>
+<td style="text-align:center;">
+3109.0393
+</td>
+<td style="text-align:center;font-weight: bold;color: darkgreen !important;">
+54.9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Saint-Cloud
+</td>
+<td style="text-align:center;">
+39760
+</td>
+<td style="text-align:center;">
+2129.8577
+</td>
+<td style="text-align:center;font-weight: bold;color: darkgreen !important;">
+52.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sceaux
+</td>
+<td style="text-align:center;">
+36010
+</td>
+<td style="text-align:center;">
+2489.2128
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+50.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+La Garenne-Colombes
+</td>
+<td style="text-align:center;">
+33090
+</td>
+<td style="text-align:center;">
+2549.2878
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+45.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bourg-la-Reine
+</td>
+<td style="text-align:center;">
+33700
+</td>
+<td style="text-align:center;">
+2460.1474
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+45.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Courbevoie
+</td>
+<td style="text-align:center;">
+32080
+</td>
+<td style="text-align:center;">
+2651.0797
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+45.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Garches
+</td>
+<td style="text-align:center;">
+36150
+</td>
+<td style="text-align:center;">
+2058.3338
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+45.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rueil-Malmaison
+</td>
+<td style="text-align:center;">
+32980
+</td>
+<td style="text-align:center;">
+2463.2252
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+44.6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ville-d’Avray
+</td>
+<td style="text-align:center;">
+38490
+</td>
+<td style="text-align:center;">
+1510.8985
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+42.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Suresnes
+</td>
+<td style="text-align:center;">
+31810
+</td>
+<td style="text-align:center;">
+2389.6953
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+41.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Boulogne-Billancourt
+</td>
+<td style="text-align:center;">
+35040
+</td>
+<td style="text-align:center;">
+1841.3882
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+40.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Issy-les-Moulineaux
+</td>
+<td style="text-align:center;">
+33650
+</td>
+<td style="text-align:center;">
+2004.9321
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+40.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Clamart
+</td>
+<td style="text-align:center;">
+29920
+</td>
+<td style="text-align:center;">
+2487.4149
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+39.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Antony
+</td>
+<td style="text-align:center;">
+32000
+</td>
+<td style="text-align:center;">
+2190.7606
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+39.6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Marnes-la-Coquette
+</td>
+<td style="text-align:center;">
+41740
+</td>
+<td style="text-align:center;">
+810.8579
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+39.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sèvres
+</td>
+<td style="text-align:center;">
+33680
+</td>
+<td style="text-align:center;">
+1900.9125
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+39.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Gennevilliers
+</td>
+<td style="text-align:center;">
+18380
+</td>
+<td style="text-align:center;">
+3949.5328
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+37.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Montrouge
+</td>
+<td style="text-align:center;">
+30500
+</td>
+<td style="text-align:center;">
+2220.3216
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+37.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Châtillon
+</td>
+<td style="text-align:center;">
+30550
+</td>
+<td style="text-align:center;">
+2204.8251
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+37.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Meudon
+</td>
+<td style="text-align:center;">
+30680
+</td>
+<td style="text-align:center;">
+1941.8293
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+34.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Vanves
+</td>
+<td style="text-align:center;">
+30770
+</td>
+<td style="text-align:center;">
+1834.3003
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+33.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chaville
+</td>
+<td style="text-align:center;">
+32290
+</td>
+<td style="text-align:center;">
+1599.6931
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+33.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nanterre
+</td>
+<td style="text-align:center;">
+21620
+</td>
+<td style="text-align:center;">
+2904.1477
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+30.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Colombes
+</td>
+<td style="text-align:center;">
+25100
+</td>
+<td style="text-align:center;">
+2369.7074
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+30.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Asnières-sur-Seine
+</td>
+<td style="text-align:center;">
+28370
+</td>
+<td style="text-align:center;">
+1825.7191
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+29.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Châtenay-Malabry
+</td>
+<td style="text-align:center;">
+27140
+</td>
+<td style="text-align:center;">
+1926.8140
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+28.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Villeneuve-la-Garenne
+</td>
+<td style="text-align:center;">
+18570
+</td>
+<td style="text-align:center;">
+3066.9666
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+27.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Clichy
+</td>
+<td style="text-align:center;">
+22410
+</td>
+<td style="text-align:center;">
+2525.5674
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+27.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fontenay-aux-Roses
+</td>
+<td style="text-align:center;">
+26990
+</td>
+<td style="text-align:center;">
+1782.8984
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+26.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Malakoff
+</td>
+<td style="text-align:center;">
+25810
+</td>
+<td style="text-align:center;">
+1941.8426
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+26.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bois-Colombes
+</td>
+<td style="text-align:center;">
+21040
+</td>
+<td style="text-align:center;">
+2137.2600
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+20.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bagneux
+</td>
+<td style="text-align:center;">
+21040
+</td>
+<td style="text-align:center;">
+2093.1396
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+19.9
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>3- D’OCCUPATION DES SOLS PAR LA VÉGÉTATION ET LES ESPACES
+VERTS POUR CHAQUE COMMUNE</strong></p>
+<pre class="r"><code>library(sf)
+library(dplyr)
+library(terra)
+library(kableExtra)
+
+communes_hds = sf::st_read(&quot;communes.shp&quot;, quiet = TRUE)
+communes_hds = sf::st_transform(communes_hds, 2154)
+espaces_naturels = sf::st_read(&quot;espaces-naturels-sensibles-ens-et-espaces-naturels-associes-ena.shp&quot;, quiet = TRUE)
+espaces_naturels = sf::st_transform(espaces_naturels, 2154)
+img = terra::rast(&quot;NDVIF.tiff&quot;)
+hds_contour = sf::st_union(communes_hds)
+layer_v = img[[2]]
+hds_terra = terra::vect(hds_contour)
+ndvi_hds = terra::project(layer_v, sf::st_crs(communes_hds)$wkt) |&gt;
+           terra::crop(hds_terra) |&gt;
+           terra::mask(hds_terra)
+ndvi_reel = -((ndvi_hds / 65535) * 2 - 1)
+veg_mask = ndvi_reel &gt; 0.3
+veg_mask[veg_mask == 0] = NA
+poly_veg_temp = terra::as.polygons(veg_mask, aggregate = TRUE)
+poly_veg = sf::st_as_sf(poly_veg_temp)
+poly_veg = sf::st_transform(poly_veg, 2154)
+surface_commune = communes_hds |&gt;
+  mutate(surface_commune_ha = as.numeric(sf::st_area(geometry)) / 10000) |&gt;
+  sf::st_drop_geometry() |&gt;
+  select(nom, surface_commune_ha)
+inter_veg = sf::st_intersection(poly_veg, communes_hds) |&gt;
+  mutate(surface_veg_ha = as.numeric(sf::st_area(geometry)) / 10000) |&gt;
+  sf::st_drop_geometry() |&gt;
+  group_by(nom) |&gt;
+  summarise(surface_veg_ha = sum(surface_veg_ha))
+inter_en = sf::st_intersection(espaces_naturels, communes_hds) |&gt;
+  mutate(surface_en_ha = as.numeric(sf::st_area(geometry)) / 10000) |&gt;
+  sf::st_drop_geometry() |&gt;
+  group_by(nom) |&gt;
+  summarise(surface_en_ha = sum(surface_en_ha))
+tableau = surface_commune |&gt;
+  left_join(inter_veg, by = &quot;nom&quot;) |&gt;
+  left_join(inter_en, by = &quot;nom&quot;) |&gt;
+  mutate(
+    surface_veg_ha = ifelse(is.na(surface_veg_ha), 0, surface_veg_ha),
+    surface_en_ha = ifelse(is.na(surface_en_ha), 0, surface_en_ha),
+    taux_vegetation = round((surface_veg_ha / surface_commune_ha) * 100, 1),
+    taux_espaces_naturels = round((surface_en_ha / surface_commune_ha) * 100, 1)
+  ) |&gt;
+  select(nom, taux_vegetation, taux_espaces_naturels) |&gt;
+  arrange(desc(taux_vegetation))
+
+colnames(tableau) = c(&quot;Commune&quot;, &quot;Taux de végétation (%)&quot;, &quot;Taux d&#39;espaces naturels (%)&quot;)
+
+kable(tableau,
+  col.names = c(&quot;Commune&quot;, &quot;Taux de végétation (%)&quot;, &quot;Taux d&#39;espaces naturels (%)&quot;),
+  caption = &quot;Classement des communes par taux de végétation&quot;,
+  align = c(&quot;l&quot;, &quot;c&quot;, &quot;c&quot;)
+) |&gt;
+  kable_styling(
+    bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;bordered&quot;),
+    full_width = FALSE,
+    position = &quot;center&quot;,
+    font_size = 13
+  ) |&gt;
+  row_spec(0, bold = TRUE, background = &quot;#2d6a4f&quot;, color = &quot;white&quot;) |&gt;
+  column_spec(2, color = ifelse(tableau[,2] &gt; 50, &quot;forestgreen&quot;, &quot;black&quot;), bold = TRUE) |&gt;
+  column_spec(3, color = ifelse(tableau[,3] &gt; 20, &quot;darkgreen&quot;, &quot;black&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed table-bordered" style="font-size: 13px; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Classement des communes par taux de végétation
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
+Commune
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
+Taux de végétation (%)
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
+Taux d’espaces naturels (%)
 </th>
 </tr>
 </thead>
@@ -837,401 +1510,504 @@ Taux d’Espaces Verts (%)
 <td style="text-align:left;">
 MARNES LA COQUETTE
 </td>
-<td style="text-align:right;">
-92.34
+<td style="text-align:center;font-weight: bold;color: forestgreen !important;">
+82.5
 </td>
-<td style="text-align:right;">
-67.64
+<td style="text-align:center;color: darkgreen !important;">
+67.6
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 VILLE D AVRAY
 </td>
-<td style="text-align:right;">
-90.50
+<td style="text-align:center;font-weight: bold;color: forestgreen !important;">
+79.2
 </td>
-<td style="text-align:right;">
-62.87
+<td style="text-align:center;color: darkgreen !important;">
+62.9
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 VAUCRESSON
 </td>
-<td style="text-align:right;">
-88.31
+<td style="text-align:center;font-weight: bold;color: forestgreen !important;">
+68.3
 </td>
-<td style="text-align:right;">
-12.58
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-CHAVILLE
-</td>
-<td style="text-align:right;">
-80.78
-</td>
-<td style="text-align:right;">
-46.41
+<td style="text-align:center;color: black !important;">
+12.6
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 MEUDON
 </td>
-<td style="text-align:right;">
-79.56
+<td style="text-align:center;font-weight: bold;color: forestgreen !important;">
+64.2
 </td>
-<td style="text-align:right;">
-40.84
+<td style="text-align:center;color: darkgreen !important;">
+40.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CHAVILLE
+</td>
+<td style="text-align:center;font-weight: bold;color: forestgreen !important;">
+62.2
+</td>
+<td style="text-align:center;color: darkgreen !important;">
+46.4
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 SAINT CLOUD
 </td>
-<td style="text-align:right;">
-78.68
+<td style="text-align:center;font-weight: bold;color: forestgreen !important;">
+61.3
 </td>
-<td style="text-align:right;">
-40.83
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-GARCHES
-</td>
-<td style="text-align:right;">
-77.61
-</td>
-<td style="text-align:right;">
-2.46
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-SCEAUX
-</td>
-<td style="text-align:right;">
-77.51
-</td>
-<td style="text-align:right;">
-33.35
+<td style="text-align:center;color: darkgreen !important;">
+40.8
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 CHATENAY-MALABRY
 </td>
-<td style="text-align:right;">
-77.31
+<td style="text-align:center;font-weight: bold;color: forestgreen !important;">
+56.1
 </td>
-<td style="text-align:right;">
-30.62
+<td style="text-align:center;color: darkgreen !important;">
+30.6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SCEAUX
+</td>
+<td style="text-align:center;font-weight: bold;color: forestgreen !important;">
+53.1
+</td>
+<td style="text-align:center;color: darkgreen !important;">
+33.3
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 SEVRES
 </td>
-<td style="text-align:right;">
-75.37
+<td style="text-align:center;font-weight: bold;color: forestgreen !important;">
+53.0
 </td>
-<td style="text-align:right;">
-27.19
+<td style="text-align:center;color: darkgreen !important;">
+27.2
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 RUEIL MALMAISON
 </td>
-<td style="text-align:right;">
-72.84
+<td style="text-align:center;font-weight: bold;color: black !important;">
+49.5
 </td>
-<td style="text-align:right;">
-18.99
+<td style="text-align:center;color: black !important;">
+19.0
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-FONTENAY AUX ROSES
+GARCHES
 </td>
-<td style="text-align:right;">
-63.77
+<td style="text-align:center;font-weight: bold;color: black !important;">
+47.1
 </td>
-<td style="text-align:right;">
-4.73
+<td style="text-align:center;color: black !important;">
+2.5
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 CLAMART
 </td>
-<td style="text-align:right;">
-62.44
+<td style="text-align:center;font-weight: bold;color: black !important;">
+41.6
 </td>
-<td style="text-align:right;">
-27.94
+<td style="text-align:center;color: darkgreen !important;">
+27.9
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 ANTONY
 </td>
-<td style="text-align:right;">
-61.28
+<td style="text-align:center;font-weight: bold;color: black !important;">
+31.6
 </td>
-<td style="text-align:right;">
-11.14
+<td style="text-align:center;color: black !important;">
+11.1
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 LE PLESSIS ROBINSON
 </td>
-<td style="text-align:right;">
-54.68
+<td style="text-align:center;font-weight: bold;color: black !important;">
+31.6
 </td>
-<td style="text-align:right;">
-13.12
+<td style="text-align:center;color: black !important;">
+13.1
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-BOURG LA REINE
+FONTENAY AUX ROSES
 </td>
-<td style="text-align:right;">
-54.66
+<td style="text-align:center;font-weight: bold;color: black !important;">
+31.3
 </td>
-<td style="text-align:right;">
-NA
+<td style="text-align:center;color: black !important;">
+4.7
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 BAGNEUX
 </td>
-<td style="text-align:right;">
-52.47
+<td style="text-align:center;font-weight: bold;color: black !important;">
+28.3
 </td>
-<td style="text-align:right;">
-18.29
+<td style="text-align:center;color: black !important;">
+18.3
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 SURESNES
 </td>
-<td style="text-align:right;">
-49.89
+<td style="text-align:center;font-weight: bold;color: black !important;">
+25.2
 </td>
-<td style="text-align:right;">
-6.43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-NEUILLY SUR SEINE
-</td>
-<td style="text-align:right;">
-44.68
-</td>
-<td style="text-align:right;">
-1.51
+<td style="text-align:center;color: black !important;">
+6.4
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 VILLENEUVE LA GARENNE
 </td>
-<td style="text-align:right;">
-42.63
+<td style="text-align:center;font-weight: bold;color: black !important;">
+23.7
 </td>
-<td style="text-align:right;">
-13.72
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-CHATILLON
-</td>
-<td style="text-align:right;">
-41.72
-</td>
-<td style="text-align:right;">
-2.94
+<td style="text-align:center;color: black !important;">
+13.7
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-NANTERRE
+NEUILLY SUR SEINE
 </td>
-<td style="text-align:right;">
-37.65
+<td style="text-align:center;font-weight: bold;color: black !important;">
+22.5
 </td>
-<td style="text-align:right;">
-5.99
+<td style="text-align:center;color: black !important;">
+1.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BOURG LA REINE
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+22.3
+</td>
+<td style="text-align:center;color: black !important;">
+0.0
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 ISSY LES MOULINEAUX
 </td>
-<td style="text-align:right;">
-36.79
+<td style="text-align:center;font-weight: bold;color: black !important;">
+17.7
 </td>
-<td style="text-align:right;">
-8.61
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-COLOMBES
-</td>
-<td style="text-align:right;">
-36.69
-</td>
-<td style="text-align:right;">
-5.03
+<td style="text-align:center;color: black !important;">
+8.6
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-BOIS COLOMBES
+CHATILLON
 </td>
-<td style="text-align:right;">
-35.95
+<td style="text-align:center;font-weight: bold;color: black !important;">
+17.5
 </td>
-<td style="text-align:right;">
-2.25
+<td style="text-align:center;color: black !important;">
+2.9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NANTERRE
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+16.4
+</td>
+<td style="text-align:center;color: black !important;">
+6.0
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 VANVES
 </td>
-<td style="text-align:right;">
-34.73
+<td style="text-align:center;font-weight: bold;color: black !important;">
+15.5
 </td>
-<td style="text-align:right;">
-3.24
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-MALAKOFF
-</td>
-<td style="text-align:right;">
-34.11
-</td>
-<td style="text-align:right;">
-0.59
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-BOULOGNE BILLANCOURT
-</td>
-<td style="text-align:right;">
-30.93
-</td>
-<td style="text-align:right;">
-5.14
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-ASNIERES-SUR-SEINE
-</td>
-<td style="text-align:right;">
-29.71
-</td>
-<td style="text-align:right;">
-2.20
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-LA GARENNE COLOMBES
-</td>
-<td style="text-align:right;">
-29.70
-</td>
-<td style="text-align:right;">
-0.31
+<td style="text-align:center;color: black !important;">
+3.2
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 GENNEVILLIERS
 </td>
-<td style="text-align:right;">
-29.36
+<td style="text-align:center;font-weight: bold;color: black !important;">
+14.6
 </td>
-<td style="text-align:right;">
-6.18
+<td style="text-align:center;color: black !important;">
+6.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MALAKOFF
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+13.1
+</td>
+<td style="text-align:center;color: black !important;">
+0.6
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 PUTEAUX
 </td>
-<td style="text-align:right;">
-28.50
+<td style="text-align:center;font-weight: bold;color: black !important;">
+13.1
 </td>
-<td style="text-align:right;">
-2.56
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-COURBEVOIE
-</td>
-<td style="text-align:right;">
-26.84
-</td>
-<td style="text-align:right;">
-3.70
+<td style="text-align:center;color: black !important;">
+2.6
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-MONTROUGE
+BOULOGNE BILLANCOURT
 </td>
-<td style="text-align:right;">
-26.58
+<td style="text-align:center;font-weight: bold;color: black !important;">
+12.9
 </td>
-<td style="text-align:right;">
-0.95
+<td style="text-align:center;color: black !important;">
+5.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+COLOMBES
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+12.4
+</td>
+<td style="text-align:center;color: black !important;">
+5.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ASNIERES-SUR-SEINE
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+9.6
+</td>
+<td style="text-align:center;color: black !important;">
+2.2
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 CLICHY
 </td>
-<td style="text-align:right;">
-22.84
+<td style="text-align:center;font-weight: bold;color: black !important;">
+9.5
 </td>
-<td style="text-align:right;">
-3.01
+<td style="text-align:center;color: black !important;">
+3.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BOIS COLOMBES
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+8.8
+</td>
+<td style="text-align:center;color: black !important;">
+2.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+COURBEVOIE
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+8.8
+</td>
+<td style="text-align:center;color: black !important;">
+3.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MONTROUGE
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+8.5
+</td>
+<td style="text-align:center;color: black !important;">
+0.9
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 LEVALLOIS PERRET
 </td>
-<td style="text-align:right;">
-19.48
+<td style="text-align:center;font-weight: bold;color: black !important;">
+8.2
 </td>
-<td style="text-align:right;">
-4.28
+<td style="text-align:center;color: black !important;">
+4.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LA GARENNE COLOMBES
+</td>
+<td style="text-align:center;font-weight: bold;color: black !important;">
+6.8
+</td>
+<td style="text-align:center;color: black !important;">
+0.3
 </td>
 </tr>
 </tbody>
 </table>
-<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" alt="" width="672" /></p>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(sf)
+library(terra)
+
+communes_hds = sf::st_read(&quot;communes.shp&quot;, quiet = TRUE)
+communes_hds = sf::st_transform(communes_hds, 2154)
+communes_hds$id = as.character(communes_hds$id)
+
+espaces_naturels = sf::st_read(&quot;espaces-naturels-sensibles-ens-et-espaces-naturels-associes-ena.shp&quot;, quiet = TRUE)
+espaces_naturels = sf::st_transform(espaces_naturels, 2154)
+
+img = terra::rast(&quot;NDVIF.tiff&quot;)
+hds_contour = sf::st_union(communes_hds)
+layer_v = img[[2]]
+hds_terra = terra::vect(hds_contour)
+
+ndvi_hds = terra::project(layer_v, sf::st_crs(communes_hds)$wkt) |&gt;
+           terra::crop(hds_terra) |&gt;
+           terra::mask(hds_terra)
+
+ndvi_reel = -((ndvi_hds / 65535) * 2 - 1)
+
+veg_mask = ndvi_reel &gt; 0.3
+veg_mask[veg_mask == 0] = NA
+poly_veg_temp = terra::as.polygons(veg_mask, aggregate = TRUE)
+poly_veg = sf::st_as_sf(poly_veg_temp)
+poly_veg = sf::st_transform(poly_veg, 2154)
+
+surface_commune = communes_hds |&gt;
+  mutate(surface_commune_ha = as.numeric(sf::st_area(geometry)) / 10000) |&gt;
+  sf::st_drop_geometry() |&gt;
+  select(nom, id, surface_commune_ha)
+
+inter_veg = sf::st_intersection(poly_veg, communes_hds) |&gt;
+  mutate(surface_veg_ha = as.numeric(sf::st_area(geometry)) / 10000) |&gt;
+  sf::st_drop_geometry() |&gt;
+  group_by(nom) |&gt;
+  summarise(surface_veg_ha = round(sum(surface_veg_ha), 2))
+
+inter_en = sf::st_intersection(espaces_naturels, communes_hds) |&gt;
+  mutate(surface_en_ha = as.numeric(sf::st_area(geometry)) / 10000) |&gt;
+  sf::st_drop_geometry() |&gt;
+  group_by(nom) |&gt;
+  summarise(surface_en_ha = round(sum(surface_en_ha), 2))
+
+tab1 = read.csv2(&quot;tableau1.csv&quot;)
+tab1$Insee = as.character(tab1$Insee)
+
+tab2 = read.csv2(&quot;tableau2.csv&quot;)
+tab2$id = as.character(tab2$id)
+
+tab_joint = tab1 |&gt;
+  left_join(tab2, by = c(&quot;Insee&quot; = &quot;id&quot;)) |&gt;
+  select(Insee, Montant_par_habitant_2024, Revenu_med)
+
+donnees = surface_commune |&gt;
+  left_join(inter_veg, by = &quot;nom&quot;) |&gt;
+  left_join(inter_en, by = &quot;nom&quot;) |&gt;
+  left_join(tab_joint, by = c(&quot;id&quot; = &quot;Insee&quot;)) |&gt;
+  mutate(
+    surface_veg_ha = ifelse(is.na(surface_veg_ha), 0, surface_veg_ha),
+    surface_en_ha = ifelse(is.na(surface_en_ha), 0, surface_en_ha),
+    taux_vegetation = round((surface_veg_ha / surface_commune_ha) * 100, 1),
+    taux_espaces_naturels = round((surface_en_ha / surface_commune_ha) * 100, 1),
+    R_min = min(Revenu_med, na.rm = TRUE),
+    R_max = max(Revenu_med, na.rm = TRUE),
+    D_min = min(Montant_par_habitant_2024, na.rm = TRUE),
+    D_max = max(Montant_par_habitant_2024, na.rm = TRUE),
+    indice_richesse = (
+      ((Revenu_med - R_min) / (R_max - R_min)) * 0.5 +
+      ((Montant_par_habitant_2024 - D_min) / (D_max - D_min)) * 0.5
+    ) * 100
+  ) |&gt;
+  arrange(indice_richesse)
+
+donnees$nom = factor(donnees$nom, levels = donnees$nom)
+
+donnees_long = donnees |&gt;
+  select(nom, taux_vegetation, taux_espaces_naturels) |&gt;
+  tidyr::pivot_longer(
+    cols = c(taux_vegetation, taux_espaces_naturels),
+    names_to = &quot;type&quot;,
+    values_to = &quot;taux&quot;
+  ) |&gt;
+  mutate(type = ifelse(type == &quot;taux_vegetation&quot;, &quot;Végétation NDVI &gt; 0.3&quot;, &quot;Espaces naturels&quot;))
+
+ggplot(donnees_long, aes(x = nom, y = taux, fill = type)) +
+  geom_col(position = &quot;dodge&quot;) +
+  scale_fill_manual(values = c(&quot;Végétation NDVI &gt; 0.3&quot; = &quot;lightgreen&quot;, &quot;Espaces naturels&quot; = &quot;forestgreen&quot;)) +
+  labs(
+    title = &quot;Taux de végétation et d&#39;espaces naturels par commune&quot;,
+    subtitle = &quot;Classement de la commune la plus pauvre à la plus riche&quot;,
+    x = &quot;Communes (de la plus pauvre à la plus riche)&quot;,
+    y = &quot;Taux (%)&quot;,
+    fill = &quot;Type&quot;
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+    plot.title = element_text(face = &quot;bold&quot;, size = 13),
+    legend.position = &quot;top&quot;
+  )</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" alt="" width="672" /></p>
 </div>
 
 

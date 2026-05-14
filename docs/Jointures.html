@@ -1049,6 +1049,835 @@ VILLENEUVE LA GARENNE
 </tr>
 </tbody>
 </table>
+<pre class="r"><code>library(sf)
+library(dplyr)
+library(terra)
+library(kableExtra)
+
+communes_hds = sf::st_read(&quot;communes.shp&quot;, quiet = TRUE)
+communes_hds = sf::st_transform(communes_hds, 2154)
+communes_hds$id = as.character(communes_hds$id)
+
+espaces_naturels = sf::st_read(&quot;espaces-naturels-sensibles-ens-et-espaces-naturels-associes-ena.shp&quot;, quiet = TRUE)
+espaces_naturels = sf::st_transform(espaces_naturels, 2154)
+
+img = terra::rast(&quot;NDVIF.tiff&quot;)
+hds_contour = sf::st_union(communes_hds)
+layer_v = img[[2]]
+hds_terra = terra::vect(hds_contour)
+
+ndvi_hds = terra::project(layer_v, sf::st_crs(communes_hds)$wkt) |&gt;
+           terra::crop(hds_terra) |&gt;
+           terra::mask(hds_terra)
+
+ndvi_reel = -((ndvi_hds / 65535) * 2 - 1)
+
+veg_mask = ndvi_reel &gt; 0.3
+veg_mask[veg_mask == 0] = NA
+poly_veg_temp = terra::as.polygons(veg_mask, aggregate = TRUE)
+poly_veg = sf::st_as_sf(poly_veg_temp)
+poly_veg = sf::st_transform(poly_veg, 2154)
+
+surface_commune = communes_hds |&gt;
+  mutate(surface_commune_ha = as.numeric(sf::st_area(geometry)) / 10000) |&gt;
+  sf::st_drop_geometry() |&gt;
+  select(nom, id, surface_commune_ha)
+
+inter_veg = sf::st_intersection(poly_veg, communes_hds) |&gt;
+  mutate(surface_veg_ha = as.numeric(sf::st_area(geometry)) / 10000) |&gt;
+  sf::st_drop_geometry() |&gt;
+  group_by(nom) |&gt;
+  summarise(surface_veg_ha = round(sum(surface_veg_ha), 2))
+
+inter_en = sf::st_intersection(espaces_naturels, communes_hds) |&gt;
+  mutate(surface_en_ha = as.numeric(sf::st_area(geometry)) / 10000) |&gt;
+  sf::st_drop_geometry() |&gt;
+  group_by(nom) |&gt;
+  summarise(surface_en_ha = round(sum(surface_en_ha), 2))
+
+tab1 = read.csv2(&quot;tableau1.csv&quot;)
+tab1$Insee = as.character(tab1$Insee)
+
+tab2 = read.csv2(&quot;tableau2.csv&quot;)
+tab2$id = as.character(tab2$id)
+
+tab_joint = tab1 |&gt;
+  left_join(tab2, by = c(&quot;Insee&quot; = &quot;id&quot;)) |&gt;
+  select(Insee, Montant_par_habitant_2024, Revenu_med)
+
+tableau_final = surface_commune |&gt;
+  left_join(inter_veg, by = &quot;nom&quot;) |&gt;
+  left_join(inter_en, by = &quot;nom&quot;) |&gt;
+  left_join(tab_joint, by = c(&quot;id&quot; = &quot;Insee&quot;)) |&gt;
+  mutate(
+    surface_commune_ha = round(surface_commune_ha, 2),
+    surface_veg_ha = ifelse(is.na(surface_veg_ha), 0, surface_veg_ha),
+    surface_en_ha = ifelse(is.na(surface_en_ha), 0, surface_en_ha)
+  ) |&gt;
+  select(nom, surface_commune_ha, surface_veg_ha, surface_en_ha, Montant_par_habitant_2024, Revenu_med) |&gt;
+  arrange(nom)
+
+kable(tableau_final,
+  col.names = c(&quot;Commune&quot;, &quot;Surface commune (ha)&quot;, &quot;Surface végétation (ha)&quot;, &quot;Surface espaces naturels (ha)&quot;, &quot;Montant par habitant 2024 (€)&quot;, &quot;Revenu médian (€)&quot;),
+  caption = &quot;Données consolidées par commune&quot;,
+  align = c(&quot;l&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;)
+) |&gt;
+  kable_styling(
+    bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;bordered&quot;),
+    full_width = FALSE,
+    position = &quot;center&quot;,
+    font_size = 13
+  ) |&gt;
+  row_spec(0, bold = TRUE, background = &quot;#2d6a4f&quot;, color = &quot;white&quot;)</code></pre>
+<table class="table table-striped table-hover table-condensed table-bordered" style="font-size: 13px; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Données consolidées par commune
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
+Commune
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
+Surface commune (ha)
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
+Surface végétation (ha)
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
+Surface espaces naturels (ha)
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
+Montant par habitant 2024 (€)
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(45, 106, 79, 255) !important;">
+Revenu médian (€)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+ANTONY
+</td>
+<td style="text-align:center;">
+955.43
+</td>
+<td style="text-align:center;">
+301.48
+</td>
+<td style="text-align:center;">
+106.41
+</td>
+<td style="text-align:center;">
+2190.7606
+</td>
+<td style="text-align:center;">
+32000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ASNIERES-SUR-SEINE
+</td>
+<td style="text-align:center;">
+482.83
+</td>
+<td style="text-align:center;">
+46.12
+</td>
+<td style="text-align:center;">
+10.64
+</td>
+<td style="text-align:center;">
+1825.7191
+</td>
+<td style="text-align:center;">
+28370
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BAGNEUX
+</td>
+<td style="text-align:center;">
+418.77
+</td>
+<td style="text-align:center;">
+118.61
+</td>
+<td style="text-align:center;">
+76.61
+</td>
+<td style="text-align:center;">
+2093.1396
+</td>
+<td style="text-align:center;">
+21040
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BOIS COLOMBES
+</td>
+<td style="text-align:center;">
+192.72
+</td>
+<td style="text-align:center;">
+16.87
+</td>
+<td style="text-align:center;">
+4.34
+</td>
+<td style="text-align:center;">
+2137.2600
+</td>
+<td style="text-align:center;">
+21040
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BOULOGNE BILLANCOURT
+</td>
+<td style="text-align:center;">
+616.88
+</td>
+<td style="text-align:center;">
+79.55
+</td>
+<td style="text-align:center;">
+31.68
+</td>
+<td style="text-align:center;">
+1841.3882
+</td>
+<td style="text-align:center;">
+35040
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BOURG LA REINE
+</td>
+<td style="text-align:center;">
+185.93
+</td>
+<td style="text-align:center;">
+41.38
+</td>
+<td style="text-align:center;">
+0.00
+</td>
+<td style="text-align:center;">
+2460.1474
+</td>
+<td style="text-align:center;">
+33700
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CHATENAY-MALABRY
+</td>
+<td style="text-align:center;">
+637.44
+</td>
+<td style="text-align:center;">
+357.46
+</td>
+<td style="text-align:center;">
+195.18
+</td>
+<td style="text-align:center;">
+1926.8140
+</td>
+<td style="text-align:center;">
+27140
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CHATILLON
+</td>
+<td style="text-align:center;">
+292.47
+</td>
+<td style="text-align:center;">
+51.26
+</td>
+<td style="text-align:center;">
+8.60
+</td>
+<td style="text-align:center;">
+2204.8251
+</td>
+<td style="text-align:center;">
+30550
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CHAVILLE
+</td>
+<td style="text-align:center;">
+357.71
+</td>
+<td style="text-align:center;">
+222.33
+</td>
+<td style="text-align:center;">
+166.00
+</td>
+<td style="text-align:center;">
+1599.6931
+</td>
+<td style="text-align:center;">
+32290
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CLAMART
+</td>
+<td style="text-align:center;">
+876.08
+</td>
+<td style="text-align:center;">
+364.06
+</td>
+<td style="text-align:center;">
+244.76
+</td>
+<td style="text-align:center;">
+2487.4149
+</td>
+<td style="text-align:center;">
+29920
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CLICHY
+</td>
+<td style="text-align:center;">
+307.94
+</td>
+<td style="text-align:center;">
+29.12
+</td>
+<td style="text-align:center;">
+9.27
+</td>
+<td style="text-align:center;">
+2525.5674
+</td>
+<td style="text-align:center;">
+22410
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+COLOMBES
+</td>
+<td style="text-align:center;">
+780.41
+</td>
+<td style="text-align:center;">
+96.43
+</td>
+<td style="text-align:center;">
+39.24
+</td>
+<td style="text-align:center;">
+2369.7074
+</td>
+<td style="text-align:center;">
+25100
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+COURBEVOIE
+</td>
+<td style="text-align:center;">
+416.78
+</td>
+<td style="text-align:center;">
+36.52
+</td>
+<td style="text-align:center;">
+15.42
+</td>
+<td style="text-align:center;">
+2651.0797
+</td>
+<td style="text-align:center;">
+32080
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FONTENAY AUX ROSES
+</td>
+<td style="text-align:center;">
+253.04
+</td>
+<td style="text-align:center;">
+79.23
+</td>
+<td style="text-align:center;">
+11.97
+</td>
+<td style="text-align:center;">
+1782.8984
+</td>
+<td style="text-align:center;">
+26990
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GARCHES
+</td>
+<td style="text-align:center;">
+271.59
+</td>
+<td style="text-align:center;">
+127.93
+</td>
+<td style="text-align:center;">
+6.68
+</td>
+<td style="text-align:center;">
+2058.3338
+</td>
+<td style="text-align:center;">
+36150
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GENNEVILLIERS
+</td>
+<td style="text-align:center;">
+1163.99
+</td>
+<td style="text-align:center;">
+169.42
+</td>
+<td style="text-align:center;">
+71.90
+</td>
+<td style="text-align:center;">
+3949.5328
+</td>
+<td style="text-align:center;">
+18380
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ISSY LES MOULINEAUX
+</td>
+<td style="text-align:center;">
+424.69
+</td>
+<td style="text-align:center;">
+75.28
+</td>
+<td style="text-align:center;">
+36.57
+</td>
+<td style="text-align:center;">
+2004.9321
+</td>
+<td style="text-align:center;">
+33650
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LA GARENNE COLOMBES
+</td>
+<td style="text-align:center;">
+178.03
+</td>
+<td style="text-align:center;">
+12.03
+</td>
+<td style="text-align:center;">
+0.55
+</td>
+<td style="text-align:center;">
+2549.2878
+</td>
+<td style="text-align:center;">
+33090
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LE PLESSIS ROBINSON
+</td>
+<td style="text-align:center;">
+340.96
+</td>
+<td style="text-align:center;">
+107.90
+</td>
+<td style="text-align:center;">
+44.74
+</td>
+<td style="text-align:center;">
+4959.5503
+</td>
+<td style="text-align:center;">
+31000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LEVALLOIS PERRET
+</td>
+<td style="text-align:center;">
+241.30
+</td>
+<td style="text-align:center;">
+19.90
+</td>
+<td style="text-align:center;">
+10.32
+</td>
+<td style="text-align:center;">
+3109.0393
+</td>
+<td style="text-align:center;">
+34500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MALAKOFF
+</td>
+<td style="text-align:center;">
+207.26
+</td>
+<td style="text-align:center;">
+27.19
+</td>
+<td style="text-align:center;">
+1.23
+</td>
+<td style="text-align:center;">
+1941.8426
+</td>
+<td style="text-align:center;">
+25810
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MARNES LA COQUETTE
+</td>
+<td style="text-align:center;">
+348.32
+</td>
+<td style="text-align:center;">
+287.42
+</td>
+<td style="text-align:center;">
+235.62
+</td>
+<td style="text-align:center;">
+810.8579
+</td>
+<td style="text-align:center;">
+41740
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MEUDON
+</td>
+<td style="text-align:center;">
+995.42
+</td>
+<td style="text-align:center;">
+638.76
+</td>
+<td style="text-align:center;">
+406.56
+</td>
+<td style="text-align:center;">
+1941.8293
+</td>
+<td style="text-align:center;">
+30680
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MONTROUGE
+</td>
+<td style="text-align:center;">
+206.56
+</td>
+<td style="text-align:center;">
+17.60
+</td>
+<td style="text-align:center;">
+1.96
+</td>
+<td style="text-align:center;">
+2220.3216
+</td>
+<td style="text-align:center;">
+30500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NANTERRE
+</td>
+<td style="text-align:center;">
+1222.69
+</td>
+<td style="text-align:center;">
+200.37
+</td>
+<td style="text-align:center;">
+73.29
+</td>
+<td style="text-align:center;">
+2904.1477
+</td>
+<td style="text-align:center;">
+21620
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NEUILLY SUR SEINE
+</td>
+<td style="text-align:center;">
+372.60
+</td>
+<td style="text-align:center;">
+83.69
+</td>
+<td style="text-align:center;">
+5.63
+</td>
+<td style="text-align:center;">
+3094.3927
+</td>
+<td style="text-align:center;">
+48010
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PUTEAUX
+</td>
+<td style="text-align:center;">
+319.78
+</td>
+<td style="text-align:center;">
+42.02
+</td>
+<td style="text-align:center;">
+8.20
+</td>
+<td style="text-align:center;">
+4212.2215
+</td>
+<td style="text-align:center;">
+30980
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RUEIL MALMAISON
+</td>
+<td style="text-align:center;">
+1453.52
+</td>
+<td style="text-align:center;">
+719.87
+</td>
+<td style="text-align:center;">
+275.99
+</td>
+<td style="text-align:center;">
+2463.2252
+</td>
+<td style="text-align:center;">
+32980
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SAINT CLOUD
+</td>
+<td style="text-align:center;">
+751.46
+</td>
+<td style="text-align:center;">
+460.50
+</td>
+<td style="text-align:center;">
+306.79
+</td>
+<td style="text-align:center;">
+2129.8577
+</td>
+<td style="text-align:center;">
+39760
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SCEAUX
+</td>
+<td style="text-align:center;">
+360.00
+</td>
+<td style="text-align:center;">
+191.10
+</td>
+<td style="text-align:center;">
+120.06
+</td>
+<td style="text-align:center;">
+2489.2128
+</td>
+<td style="text-align:center;">
+36010
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SEVRES
+</td>
+<td style="text-align:center;">
+392.88
+</td>
+<td style="text-align:center;">
+208.14
+</td>
+<td style="text-align:center;">
+106.82
+</td>
+<td style="text-align:center;">
+1900.9125
+</td>
+<td style="text-align:center;">
+33680
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SURESNES
+</td>
+<td style="text-align:center;">
+378.49
+</td>
+<td style="text-align:center;">
+95.43
+</td>
+<td style="text-align:center;">
+24.35
+</td>
+<td style="text-align:center;">
+2389.6953
+</td>
+<td style="text-align:center;">
+31810
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VANVES
+</td>
+<td style="text-align:center;">
+155.62
+</td>
+<td style="text-align:center;">
+24.15
+</td>
+<td style="text-align:center;">
+5.04
+</td>
+<td style="text-align:center;">
+1834.3003
+</td>
+<td style="text-align:center;">
+30770
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VAUCRESSON
+</td>
+<td style="text-align:center;">
+309.81
+</td>
+<td style="text-align:center;">
+211.59
+</td>
+<td style="text-align:center;">
+38.96
+</td>
+<td style="text-align:center;">
+2958.4809
+</td>
+<td style="text-align:center;">
+41320
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VILLE D AVRAY
+</td>
+<td style="text-align:center;">
+368.92
+</td>
+<td style="text-align:center;">
+292.14
+</td>
+<td style="text-align:center;">
+231.93
+</td>
+<td style="text-align:center;">
+1510.8985
+</td>
+<td style="text-align:center;">
+38490
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VILLENEUVE LA GARENNE
+</td>
+<td style="text-align:center;">
+319.95
+</td>
+<td style="text-align:center;">
+75.94
+</td>
+<td style="text-align:center;">
+43.90
+</td>
+<td style="text-align:center;">
+3066.9666
+</td>
+<td style="text-align:center;">
+18570
+</td>
+</tr>
+</tbody>
+</table>
 <hr />
 </div>
 </div>

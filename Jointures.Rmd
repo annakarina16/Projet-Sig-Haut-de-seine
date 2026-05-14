@@ -112,6 +112,88 @@ kable(
   row_spec(0, bold = TRUE, color = "white", background = "#2C3E50")
 ```
 
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+library(sf)
+library(dplyr)
+library(terra)
+library(kableExtra)
+
+communes_hds = sf::st_read("communes.shp", quiet = TRUE)
+communes_hds = sf::st_transform(communes_hds, 2154)
+communes_hds$id = as.character(communes_hds$id)
+
+espaces_naturels = sf::st_read("espaces-naturels-sensibles-ens-et-espaces-naturels-associes-ena.shp", quiet = TRUE)
+espaces_naturels = sf::st_transform(espaces_naturels, 2154)
+
+img = terra::rast("NDVIF.tiff")
+hds_contour = sf::st_union(communes_hds)
+layer_v = img[[2]]
+hds_terra = terra::vect(hds_contour)
+
+ndvi_hds = terra::project(layer_v, sf::st_crs(communes_hds)$wkt) |>
+           terra::crop(hds_terra) |>
+           terra::mask(hds_terra)
+
+ndvi_reel = -((ndvi_hds / 65535) * 2 - 1)
+
+veg_mask = ndvi_reel > 0.3
+veg_mask[veg_mask == 0] = NA
+poly_veg_temp = terra::as.polygons(veg_mask, aggregate = TRUE)
+poly_veg = sf::st_as_sf(poly_veg_temp)
+poly_veg = sf::st_transform(poly_veg, 2154)
+
+surface_commune = communes_hds |>
+  mutate(surface_commune_ha = as.numeric(sf::st_area(geometry)) / 10000) |>
+  sf::st_drop_geometry() |>
+  select(nom, id, surface_commune_ha)
+
+inter_veg = sf::st_intersection(poly_veg, communes_hds) |>
+  mutate(surface_veg_ha = as.numeric(sf::st_area(geometry)) / 10000) |>
+  sf::st_drop_geometry() |>
+  group_by(nom) |>
+  summarise(surface_veg_ha = round(sum(surface_veg_ha), 2))
+
+inter_en = sf::st_intersection(espaces_naturels, communes_hds) |>
+  mutate(surface_en_ha = as.numeric(sf::st_area(geometry)) / 10000) |>
+  sf::st_drop_geometry() |>
+  group_by(nom) |>
+  summarise(surface_en_ha = round(sum(surface_en_ha), 2))
+
+tab1 = read.csv2("tableau1.csv")
+tab1$Insee = as.character(tab1$Insee)
+
+tab2 = read.csv2("tableau2.csv")
+tab2$id = as.character(tab2$id)
+
+tab_joint = tab1 |>
+  left_join(tab2, by = c("Insee" = "id")) |>
+  select(Insee, Montant_par_habitant_2024, Revenu_med)
+
+tableau_final = surface_commune |>
+  left_join(inter_veg, by = "nom") |>
+  left_join(inter_en, by = "nom") |>
+  left_join(tab_joint, by = c("id" = "Insee")) |>
+  mutate(
+    surface_commune_ha = round(surface_commune_ha, 2),
+    surface_veg_ha = ifelse(is.na(surface_veg_ha), 0, surface_veg_ha),
+    surface_en_ha = ifelse(is.na(surface_en_ha), 0, surface_en_ha)
+  ) |>
+  select(nom, surface_commune_ha, surface_veg_ha, surface_en_ha, Montant_par_habitant_2024, Revenu_med) |>
+  arrange(nom)
+
+kable(tableau_final,
+  col.names = c("Commune", "Surface commune (ha)", "Surface végétation (ha)", "Surface espaces naturels (ha)", "Montant par habitant 2024 (€)", "Revenu médian (€)"),
+  caption = "Données consolidées par commune",
+  align = c("l", "c", "c", "c", "c", "c")
+) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "bordered"),
+    full_width = FALSE,
+    position = "center",
+    font_size = 13
+  ) |>
+  row_spec(0, bold = TRUE, background = "#2d6a4f", color = "white")
+```
 
 ---
 

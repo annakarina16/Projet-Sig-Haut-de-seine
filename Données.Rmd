@@ -14,8 +14,8 @@ Afin d'identifier l'ensemble des surfaces végétalisées du département des **
    
    **Couche NDVI découper selon les limites du département** : 
    
-```{r echo=FALSE, out.width="30%"}
-knitr::include_graphics("image_ndvi.png")
+```{r echo=TRUE, out.width="30%"}
+knitr::include_graphics("Ndvicomplet.png")
 ```
 ---
 
@@ -31,8 +31,24 @@ L'objéctif est de comparer la couverture végétale brute (issue du raster) ave
    
    **Répartition des espaces naturels du département des Hauts-de-Seine** : 
    
-```{r echo=FALSE, out.width="40%"}
-knitr::include_graphics("Repartition_EN.png")
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+library(sf)
+library(mapsf)
+
+communes_hds = sf::st_read("communes.shp", quiet = TRUE)
+espaces_naturels = sf::st_read("espaces-naturels-sensibles-ens-et-espaces-naturels-associes-ena.shp", quiet = TRUE)
+espaces_naturels = sf::st_transform(espaces_naturels, 2154)
+
+mf_theme("default")
+mf_map(communes_hds, col = "#f0f0f0", border = "grey", lwd = 0.8)
+mf_map(
+  x = espaces_naturels,
+  col = "forestgreen",
+  border = "forestgreen",
+  lwd = 0.5,
+  add = TRUE
+)
+mf_layout(title = "Répartition des espaces naturels du département des Hauts-de-Seine", scale = TRUE, arrow = TRUE)
 ```
 
 ---
@@ -66,38 +82,33 @@ $$\\text{Indice de richesse} =
 
 > Cet indice permet de pondérer la richesse directe des ménages avec la capacité d'investissement de leur commune de résidence.
 
-```{r echo=FALSE, message=FALSE}
-library(knitr)
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+library(dplyr)
 library(kableExtra)
 
-df <- data.frame(
-  Commune = c("Asnières-sur-Seine","Antony","Bagneux","Bois-Colombes",
-              "Boulogne-Billancourt","Bourg-la-Reine","Châtenay-Malabry",
-              "Châtillon","Chaville","Clamart","Clichy","Colombes",
-              "Courbevoie","Fontenay-aux-Roses","Garches","Gennevilliers",
-              "Issy-les-Moulineaux","La Garenne-Colombes","Le Plessis-Robinson",
-              "Levallois-Perret","Malakoff","Marnes-la-Coquette","Meudon",
-              "Montrouge","Nanterre","Neuilly-sur-Seine","Puteaux",
-              "Rueil-Malmaison","Saint-Cloud","Sceaux","Sèvres","Suresnes",
-              "Vanves","Vaucresson","Ville-d'Avray","Villeneuve-la-Garenne"),
-  Revenu_median = c(28370,32000,21040,21040,35040,33700,27140,30550,32290,
-                    29920,22410,25100,32080,26990,36150,18380,33650,33090,
-                    31000,34500,25810,41740,30680,30500,21620,48010,30980,
-                    32980,39760,36010,33680,31810,30770,41320,38490,18570),
-  Montant_par_habitant_2024 = c(1825.7,2190.8,2093.1,2137.3,1841.4,2460.1,
-                                 1926.8,2204.8,1599.7,2487.4,2525.6,2369.7,
-                                 2651.1,1782.9,2058.3,3949.5,2004.9,2549.3,
-                                 4959.6,3109.0,1941.8,810.9,1941.8,2220.3,
-                                 2904.1,3094.4,4212.2,2463.2,2129.9,2489.2,
-                                 1900.9,2389.7,1834.3,2958.5,1510.9,3067.0)
-)
+tab1 = read.csv2("tableau1.csv")
+tab1$Insee = as.character(tab1$Insee)
 
-kable(df,
-      col.names = c("Commune", "Revenu médian (€)", "Montant par habitant 2024 (€)"),
-      align = c("l", "r", "r"),
-      format.args = list(big.mark = " ")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
-                full_width = FALSE)
+tab2 = read.csv2("tableau2.csv")
+tab2$id = as.character(tab2$id)
+
+tab_joint = tab1 |>
+  left_join(tab2, by = c("Insee" = "id")) |>
+  select(Nom, Montant_par_habitant_2024, Revenu_med) |>
+  arrange(Nom)
+
+kable(tab_joint,
+  col.names = c("Commune", "Montant par habitant 2024 (€)", "Revenu médian (€)"),
+  caption = "Revenu médian et montant par habitant par commune",
+  align = c("l", "c", "c")
+) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "bordered"),
+    full_width = FALSE,
+    position = "center",
+    font_size = 13
+  ) |>
+  row_spec(0, bold = TRUE, background = "#2d6a4f", color = "white")
 ```
 
 
